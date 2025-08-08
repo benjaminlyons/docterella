@@ -1,0 +1,18 @@
+[project]
+name = "docterella"
+version = "0.1.0"
+description = "An application for reviewing, validating, and updating code documentation, specifically docstrings, using an LLM."
+authors = [
+    {name = "Ben Lyons", email = "docterella@mail.blyons.me"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic (>=2.11.7,<3.0.0)",
+    "ollama (>=0.5.3,<0.6.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
