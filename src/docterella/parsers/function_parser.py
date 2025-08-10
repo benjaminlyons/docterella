@@ -1,19 +1,14 @@
 import ast
 import astor
 
-from pydantic import BaseModel
+from docterella.components.metadata import FunctionMetadata
 
-class FunctionMetadata(BaseModel):
-    function_name: str
-    lineno: int
-    source: str
-
-def parse_function(node: ast.FunctionDef):
+def parse_function(node: ast.FunctionDef) -> FunctionMetadata:
     if not isinstance(node, ast.FunctionDef):
         raise TypeError("Argument `node` must be type ast.FunctionDef")
 
     return FunctionMetadata(
-        function_name=node.name,
+        name=node.name,
         lineno=node.lineno,
         source=astor.to_source(node),
     )

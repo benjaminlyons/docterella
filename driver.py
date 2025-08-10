@@ -13,7 +13,6 @@ def main():
 
     validator = ValidationAgent(connection)
     parser = FileParser(filename)
-
     
     for result in validate_sequence(parser, validator):
         print(result)

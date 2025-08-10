@@ -1,10 +1,10 @@
 import ast
 import astor
 
-from docterella.output import DocstringAssessment
+from docterella.components.assessment import DocstringAssessment
 from docterella.connections.base_connection import BaseConnection
 from docterella.prompts.function_prompt import FUNCTION_PROMPT
-from docterella.results import ValidationResults
+from docterella.components.results import ValidationResults
 from docterella.parsers.function_parser import FunctionMetadata
 
 class ValidationAgent:
@@ -35,5 +35,5 @@ class ValidationAgent:
         )
 
         da = DocstringAssessment.model_validate_json(response)
-        
+
         return ValidationResults(function, da)

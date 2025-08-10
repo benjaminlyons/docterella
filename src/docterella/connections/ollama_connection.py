@@ -1,7 +1,6 @@
 import ollama
 
 from docterella.connections.base_connection import BaseConnection
-from docterella.output import DocstringAssessment
 from typing import Dict
 
 class OllamaConnection(BaseConnection):
