@@ -1,9 +1,10 @@
-import json
-import ollama
 import ast
 import astor
+import json
+import ollama
 
 from docterella.output import DocstringValidation
+from typing import Dict
 
 system_prompt = """
 You are a Python documentation expert.
@@ -104,36 +105,38 @@ def calculate_average(numbers, include_negatives=True):
 RESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY TEXT OUTSIDE THE JSON STRUCTURE.
 """
 
-with open("docstring_errors.py") as f:
-    content = f.read()
 
-parsed_content = ast.parse(content)
-for node in ast.walk(parsed_content):
+class ValidationAgent:
+    def __init__(self, model: str, ollama_options: Dict = None):
+        self.model = model
+        self.instructions = system_prompt
 
-    if not isinstance(node, ast.FunctionDef):
-        continue
+        if ollama_options is None:
+            self.ollama_options = {"temperature": 0, "top_p": 0.1}
 
-    print(astor.to_source(node))
+    def validate_function(self, function_node: ast.FunctionDef):
+        """Validate docstrings for the provided function
 
-    docstring = ast.get_docstring(node)
+        Parameters
+        ----------
+        function_node: ast.FunctionDef
+            The ast.FunctionDef representation of the Python function to examine
 
-    # TODO: Check this works with null docstring
-    # if docstring:
-    #     node.body = node.body[1:]
+        Returns
+        -------
+        str
+            Return a JSON representation of the validation results, must be compliant
+            with the `DocstringValidation` schema.
+        """
+        source = astor.to_source(function_node)
 
-    source = astor.to_source(node)
+        prompt = f"{self.instructions}\n<code>{source}</code>\n"
 
-    prompt = (
-        f"{system_prompt}\n<code>{source}</code>\n"
-    )
+        result = ollama.generate(
+            model=self.model,
+            prompt=prompt,
+            format=DocstringValidation.model_json_schema(),
+            options=self.ollama_options
+        )
 
-    result = ollama.generate(
-        model='llama3.1:8b-instruct-q8_0',
-        prompt=prompt,
-        format=DocstringValidation.model_json_schema(),
-        options={'temperature': 0, 'top_p': 0.1},
-    )
-
-
-    print(json.dumps(json.loads(result["response"]), indent=4))
-
+        return result['response']
