@@ -4,7 +4,8 @@ from docterella.agent import ValidationAgent
 from docterella.connections.ollama_connection import OllamaConnection
 from docterella.parsers.file_parser import FileParser
 from docterella.parsers.sequence_parser import SequenceParser
-
+from docterella.components.metadata import ClassMetadata
+from docterella.components.metadata import FunctionMetadata
 
 def main():
     filename = sys.argv[1]
@@ -19,8 +20,12 @@ def main():
 
     
 def validate_sequence(parser: SequenceParser, validator: ValidationAgent):
-    for function in parser.parse():
-        yield validator.validate_function(function)
+    for node in parser.parse():
+        if isinstance(node, ClassMetadata):
+            yield validator.validate_class(node)
+        
+        if isinstance(node, FunctionMetadata):
+            yield validator.validate_function(node)
 
 if __name__ == "__main__":
     main()

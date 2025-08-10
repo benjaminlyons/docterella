@@ -1,16 +1,20 @@
 import ast
 import astor
 
-from docterella.components.assessment import DocstringAssessment
+from docterella.components.assessment import FunctionDocstringAssessment
+from docterella.components.assessment import ClassDocstringAssessment
 from docterella.connections.base_connection import BaseConnection
 from docterella.prompts.function_prompt import FUNCTION_PROMPT
+from docterella.prompts.class_prompt import CLASS_PROMPT
 from docterella.components.results import ValidationResults
 from docterella.parsers.function_parser import FunctionMetadata
+from docterella.parsers.class_parser import ClassMetadata
 
 class ValidationAgent:
     def __init__(self, connection: BaseConnection):
         self.connection = connection
         self.function_instructions = FUNCTION_PROMPT
+        self.class_instructions = CLASS_PROMPT
 
     def validate_function(self, function: FunctionMetadata):
         """Validate docstrings for the provided function
@@ -31,9 +35,23 @@ class ValidationAgent:
         prompt = f"{self.function_instructions}\n<code>{source}</code>\n"
 
         response = self.connection.prompt(
-            prompt, format=DocstringAssessment.model_json_schema()
+            prompt, format=FunctionDocstringAssessment.model_json_schema()
         )
 
-        da = DocstringAssessment.model_validate_json(response)
+        da = FunctionDocstringAssessment.model_validate_json(response)
 
         return ValidationResults(function, da)
+    
+    def validate_class(self, cls: ClassMetadata):
+        source = cls.constructor.source
+        docstring = cls.docstring
+
+        prompt = f"{self.class_instructions}\n<docstring>{docstring}</docstring>\n<constructor>{source}</constructor>\n"
+
+        response = self.connection.prompt(
+            prompt, format=ClassDocstringAssessment.model_json_schema()
+        )
+
+        cda = ClassDocstringAssessment.model_validate_json(response)
+
+        return ValidationResults(cls, cda)
