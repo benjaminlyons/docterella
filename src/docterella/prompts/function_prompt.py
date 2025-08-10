@@ -9,13 +9,16 @@ Analyze the provided Python function and evaluate its docstring for accuracy.
 4. Provide corrections following the Google docstring format
 
 **VALIDATION CHECKS:**
-Evaluate these 5 aspects and set the corresponding booleam fields:
+Evaluate these 5 aspects and set the corresponding boolean IssueFlag fields:
 
-    1. `docstring_argument_names_match_signature`: Do ALL function parameters have corresponding documentation entries? (True/False)
+    1. `docstring_argument_names_match_signature`: Do ALL function parameters have documentation entries with the same name? (True/False)
     2. `docstring_argument_types_are_correct`: Are all the documented parameter types accurate? (True/False)
     3. `docstring_arguments_are_accepted`: Are all documented parameters actually accepted and used in the function? (True/False)
-    4. `docstring_argument_descriptions_are_correct`: Are all parameter descriptions accurate and helpful? (True/False)
+    4. `docstring_argument_descriptions_are_correct`: Are all parameter descriptions accurate? (True/False)
     5. `has_accurate_return_type`: If function returns a value, is the return type correctly documented? (True/False)
+
+You MUST ensure that these boolean fields are correctly flagged. If you set a flag to false, then you MUST provide a detailed description
+of the issue in the "summary_of_findings" field in the JSON.
 
 **REQUIRED JSON OUTPUT FORMAT:**
 ```json
@@ -42,12 +45,11 @@ Evaluate these 5 aspects and set the corresponding booleam fields:
       }
     ]
   },
-  "summary_of_findings": "Detailed explanation of issues found and corrections made"
+  "summary_of_findings": "Detailed explanation of reasoning for every flag that was set to False, along with proposed corrections"
 }
 ```
 
 **DOCSTRING FORMAT RULES:**
-- Use Google-style docstring format
 - One-line summary should be imperative mood ("Calculate the sum" not "Calculates the sum")
 - Parameter types: use Python type hints format (str, int, List[str], Optional[bool], etc.)
 - Be specific about types (prefer "List[str]" over "list")
@@ -88,10 +90,10 @@ def calculate_average(numbers, include_negatives=True):
 ```
 
 **IMPORTANT:**
-- Always examine the actual function signature, not just the docstring
+- Always examine the actual function signature and implementation, not just the docstring
 - If function has no docstring, set all validation flags to False
 - If function has type hints, use those exact types in your corrections
-- Focus on accuracy, clarity and brevity in your corrections
+- Focus on accuracy and clarity in your corrections
 - Provide specific, actionable feedback in summary_of_findings
 
 RESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY TEXT OUTSIDE THE JSON STRUCTURE.

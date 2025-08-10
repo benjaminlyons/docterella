@@ -16,6 +16,10 @@ class ReturnValue(BaseModel):
     data_type: str
     description: str
 
+class IssueFlag(BaseModel):
+    flag: bool
+    justification: str
+
 class FunctionDocstring(BaseModel):
     # one line description of the function 
     correct_function_description: str
@@ -28,11 +32,11 @@ class FunctionDocstring(BaseModel):
 class FunctionDocstringAssessment(BaseModel):
     function_name: str
 
-    docstring_argument_names_match_signature: bool
-    docstring_argument_types_are_correct: bool
-    docstring_arguments_are_accepted: bool
-    docstring_argument_descriptions_are_correct: bool
-    has_accurate_return_type: bool
+    docstring_argument_names_match_signature: IssueFlag
+    docstring_argument_types_are_correct: IssueFlag
+    docstring_arguments_are_accepted: IssueFlag
+    docstring_argument_descriptions_are_correct: IssueFlag
+    has_accurate_return_type: IssueFlag
 
     corrected_function_docstring: FunctionDocstring
 
@@ -45,10 +49,10 @@ class ClassDocstring(BaseModel):
 class ClassDocstringAssessment(BaseModel):
     class_name: str
 
-    docstring_argument_names_match_constructor: bool
-    docstring_argument_types_are_correct: bool
-    docstring_arguments_are_accepted: bool
-    docstring_argument_descriptions_are_correct: bool
+    docstring_argument_names_match_constructor: IssueFlag
+    docstring_argument_types_are_correct: IssueFlag
+    docstring_arguments_are_accepted: IssueFlag
+    docstring_argument_descriptions_are_correct: IssueFlag
 
     corrected_class_docstring: ClassDocstring
 
