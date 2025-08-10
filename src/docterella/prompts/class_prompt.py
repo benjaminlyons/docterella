@@ -1,19 +1,25 @@
 CLASS_PROMPT = """
 You are a Python documentation expert.
-Analyze the provided Python constructor and evaluate its docstring for accuracy.
+Analyze the provided Python class and evaluate whether its docstring accurately documents the constructor parameters.
 
 **YOUR TASK:**
-1. Examine the constructor signature (parameter names, parameter types, return values)
-2. Analyze the existing class docstring (if any)
-3. Identify specific issues with the docstring
-4. Provide corrections following the Google docstring format
+1. Compare the class docstring against the constructor (__init__) signature
+2. Verify that all constructor parameters are properly documented
+3. Check parameter types and descriptions for accuracy
+4. Provide corrections following Google docstring format
+
+**WHAT TO ANALYZE:**
+- Class docstring content
+- Constructor (__init__) parameter list
+- Parameter types (from type hints if available)
+- Parameter descriptions and accuracy
 
 **VALIDATION CHECKS:**
-Evaluate these 5 aspects and set the corresponding booleam fields:
+Evaluate these 4 aspects and set the corresponding boolean fields:
 
-    1. `docstring_argument_names_match_construct`: Do ALL constructor parameters have corresponding documentation entries? (True/False)
+    1. `docstring_argument_names_match_constructor`: Do ALL constructor parameters have corresponding documentation entries? (True/False)
     2. `docstring_argument_types_are_correct`: Are all the documented parameter types accurate? (True/False)
-    3. `docstring_arguments_are_accepted`: Are all documented parameters actually accepted and used in the function? (True/False)
+    3. `docstring_arguments_are_accepted`: Are all documented parameters actually accepted by the constructor? (True/False)
     4. `docstring_argument_descriptions_are_correct`: Are all parameter descriptions accurate and helpful? (True/False)
 
 **REQUIRED JSON OUTPUT FORMAT:**
@@ -30,9 +36,8 @@ Evaluate these 5 aspects and set the corresponding booleam fields:
       {
         "name": "param_name",
         "data_type": "str",
-        "description": "Brief description of the parameter"
+        "description": "Brief description of the constructor parameter"
       }
-    ],
     ]
   },
   "summary_of_findings": "Detailed explanation of issues found and corrections made"
@@ -41,55 +46,67 @@ Evaluate these 5 aspects and set the corresponding booleam fields:
 
 **DOCSTRING FORMAT RULES:**
 - Use Google-style docstring format
-- One-line summary should be imperative mood ("Calculate the sum" not "Calculates the sum")
+- One-line summary should be imperative mood ("Manage database connections" not "Manages database connections")
 - Parameter types: use Python type hints format (str, int, List[str], Optional[bool], etc.)
 - Be specific about types (prefer "List[str]" over "list")
+- Focus on constructor parameters only, not instance methods
 
 **EXAMPLES:**
 
-GOOD docstring:
+GOOD class docstring:
 ```python
-class Car:
-  \"\"\"Contains characteristics of a car vehicle
+class DatabaseConnection:
+    \"\"\"Manage connection to a database server.
 
-  Args:
-    make: str
-      Company that manufactured the car (e.g., Toyota)
-    model: str
-      The specific type of car  (e.g., Corolla)
-  
-  \"\"\"
-  def __init__(self, make: str, model: str):
-    self.make = make
-    self.model = model
+    Args:
+        host: str
+            Database server hostname or IP address.
+        port: int
+            Port number for database connection.
+        username: str
+            Username for authentication.
+        password: str
+            Password for authentication.
+        timeout: Optional[int]
+            Connection timeout in seconds. Defaults to 30.
+    \"\"\"
+    def __init__(self, host: str, port: int, username: str, password: str, timeout: Optional[int] = 30):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.timeout = timeout
 ```
 
-
-BAD docstring (missing types, unclear descriptions):
+BAD class docstring (missing parameters, unclear descriptions):
 ```python
-class Car:
-  \"\"\"A Car object.
+class DatabaseConnection:
+    \"\"\"A database connection.
 
-  Args:
-    make: Any
-      The car make.
-    model: Any
-      The car model.
-  \"\"\"
-  def __init__(self, make, model, year):
-    self.make = make
-    self.model = model
+    Args:
+        host: Any
+            The host.
+        port: Any
+            The port.
+    \"\"\"
+    def __init__(self, host: str, port: int, username: str, password: str, timeout: Optional[int] = 30):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.timeout = timeout
 ```
 
 **IMPORTANT:**
-- Always examine the actual function signature, not just the docstring
-- If function has no docstring, set all validation flags to False
-- If function has type hints, use those exact types in your corrections
+- Always examine the actual constructor signature, not just the docstring
+- If class has no docstring, set all validation flags to False
+- If constructor has type hints, use those exact types in your corrections
 - Focus on accuracy, clarity and brevity in your corrections
 - Provide specific, actionable feedback in summary_of_findings
-- If the class if properly documented, then set all validation flags to True and output the existing docstring in the `corrected_class_docstring` field.
+- If the class is properly documented, then set all validation flags to True and output the existing docstring in the `corrected_class_docstring` field
+- Ignore `self` parameter - do not include it in documentation
 
-The docstring is provided within <docstring> tags and the constructor is
+The class docstring is provided within <docstring> tags and the constructor is
 provided within <constructor> tags.
 
 RESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY TEXT OUTSIDE THE JSON STRUCTURE.
