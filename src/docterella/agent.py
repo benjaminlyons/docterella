@@ -1,120 +1,18 @@
 import ast
 import astor
-import json
-import ollama
 
-from docterella.output import DocstringValidation
-from typing import Dict
-
-system_prompt = """
-You are a Python documentation expert.
-Analyze the provided Python function and evaluate its docstring for accuracy.
-
-**YOUR TASK:**
-1. Examine the function signature (parameter names, parameter types, return values)
-2. Analyze the existing docstring (if any)
-3. Identify specific issues with the dostring
-4. Provide corrections following the Google docstring format
-
-**VALIDATION CHECKS:**
-Evaluate these 5 aspects and set the corresponding booleam fields:
-
-    1. `docstring_argument_names_match_function_signature`: Do ALL function parameters have corresponding documentation entries? (True/False)
-    2. `docstring_argument_types_are_correct`: Are all the documented parameter types accurate? (True/False)
-    3. `docstring_arguments_are_accepted`: Are all documented parameters actually accepted and used in the function? (True/False)
-    4. `docstring_argument_descriptions_are_correct`: Are all parameter descriptions accurate and helpful? (True/False)
-    5. `has_accurate_return_type`: If function returns a value, is the return type correctly documented? (True/False)
-
-**REQUIRED JSON OUTPUT FORMAT:**
-```json
-{
-  "function_name": "exact_function_name_here",
-  "docstring_argument_names_match_function_signature": true/false,
-  "docstring_argument_types_are_correct": true/false,
-  "docstring_arguments_are_accepted": true/false,
-  "docstring_argument_descriptions_are_correct": true/false,
-  "has_accurate_return_type": true/false,
-  "corrected_function_docstring": {
-    "correct_function_description": "One-line summary of what the function does",
-    "correct_function_arguments": [
-      {
-        "name": "param_name",
-        "data_type": "str",
-        "description": "Brief description of the parameter"
-      }
-    ],
-    "correct_function_return_values": [
-      {
-        "data_type": "bool", 
-        "description": "Description of what is returned"
-      }
-    ]
-  },
-  "summary_of_findings": "Detailed explanation of issues found and corrections made"
-}
-```
-
-**DOCSTRING FORMAT RULES:**
-- Use Google-style docstring format
-- One-line summary should be imperative mood ("Calculate the sum" not "Calculates the sum")
-- Parameter types: use Python type hints format (str, int, List[str], Optional[bool], etc.)
-- Be specific about types (prefer "List[str]" over "list")
-- Return descriptions should explain what the value represents, not just the type
-
-**EXAMPLES:**
-
-GOOD docstring:
-```python
-def calculate_average(numbers: List[float], include_negatives: bool = True) -> float:
-    \"\"\"Calculate the arithmetic mean of a list of numbers.
-    
-    Args:
-        numbers: List[float]
-            List of numeric values to average.
-        include_negatives: bool
-            Whether to include negative values in calculation.
-        
-    Returns:
-        The arithmetic mean of the input numbers.
-        
-    Raises:
-        ValueError: If the numbers list is empty.
-    \"\"\"
-```
-
-BAD docstring (missing types, unclear descriptions):
-```python
-def calculate_average(numbers, include_negatives=True):
-    \"\"\"Calculates average.
-    
-    Args:
-        numbers: some numbers
-        
-    Returns:
-        average
-    \"\"\"
-```
-
-**IMPORTANT:**
-- Always examine the actual function signature, not just the docstring
-- If function has no docstring, set all validation flags to False
-- If function has type hints, use those exact types in your corrections
-- Focus on accuracy, clarity and brevity in your corrections
-- Provide specific, actionable feedback in summary_of_findings
-
-RESPOND ONLY WITH VALID JSON. DO NOT INCLUDE ANY TEXT OUTSIDE THE JSON STRUCTURE.
-"""
-
+from docterella.output import DocstringAssessment
+from docterella.connections.base_connection import BaseConnection
+from docterella.prompts.function_prompt import FUNCTION_PROMPT
+from docterella.results import ValidationResults
+from docterella.parsers.function_parser import FunctionMetadata
 
 class ValidationAgent:
-    def __init__(self, model: str, ollama_options: Dict = None):
-        self.model = model
-        self.instructions = system_prompt
+    def __init__(self, connection: BaseConnection):
+        self.connection = connection
+        self.function_instructions = FUNCTION_PROMPT
 
-        if ollama_options is None:
-            self.ollama_options = {"temperature": 0, "top_p": 0.1}
-
-    def validate_function(self, function_node: ast.FunctionDef):
+    def validate_function(self, function: FunctionMetadata):
         """Validate docstrings for the provided function
 
         Parameters
@@ -128,15 +26,14 @@ class ValidationAgent:
             Return a JSON representation of the validation results, must be compliant
             with the `DocstringValidation` schema.
         """
-        source = astor.to_source(function_node)
+        source = function.source
 
-        prompt = f"{self.instructions}\n<code>{source}</code>\n"
+        prompt = f"{self.function_instructions}\n<code>{source}</code>\n"
 
-        result = ollama.generate(
-            model=self.model,
-            prompt=prompt,
-            format=DocstringValidation.model_json_schema(),
-            options=self.ollama_options
+        response = self.connection.prompt(
+            prompt, format=DocstringAssessment.model_json_schema()
         )
 
-        return result['response']
+        da = DocstringAssessment.model_validate_json(response)
+        
+        return ValidationResults(function, da)
