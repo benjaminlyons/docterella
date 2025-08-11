@@ -48,10 +48,9 @@ class ClassDocstring(BaseModel):
 class ClassDocstringAssessment(BaseModel):
     class_name: str
 
-    docstring_argument_names_match_constructor: IssueFlag
-    docstring_argument_types_are_correct: IssueFlag
-    docstring_arguments_are_accepted: IssueFlag
-    docstring_argument_descriptions_are_correct: IssueFlag
+    parameter_names_are_correct: bool
+    parameter_types_are_correct: bool
+    parameter_descriptions_are_correct: bool
 
     corrected_class_docstring: ClassDocstring
 
