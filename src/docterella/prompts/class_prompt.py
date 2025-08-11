@@ -17,19 +17,17 @@ Analyze the provided Python class and evaluate whether its docstring accurately 
 **VALIDATION CHECKS:**
 Evaluate these 4 aspects and set the corresponding boolean fields:
 
-    1. `docstring_argument_names_match_constructor`: Do ALL constructor parameters have corresponding documentation entries? (True/False)
-    2. `docstring_argument_types_are_correct`: Are all the documented parameter types accurate? (True/False)
-    3. `docstring_arguments_are_accepted`: Are all documented parameters actually accepted by the constructor? (True/False)
-    4. `docstring_argument_descriptions_are_correct`: Are all parameter descriptions accurate and helpful? (True/False)
+    1. `parameter_names_are_correct`: Do ALL constructor parameters have corresponding documentation entries? (True/False)
+    2. `parameter_types_are_correct`: Are all the documented parameter types accurate? (True/False)
+    3. `parameter_descriptions_are_correct`: Are all parameter descriptions accurate and helpful? (true/false)
 
 **REQUIRED JSON OUTPUT FORMAT:**
 ```json
 {
   "class_name": "exact_class_name_here",
-  "docstring_argument_names_match_constructor": true/false,
-  "docstring_argument_types_are_correct": true/false,
-  "docstring_arguments_are_accepted": true/false,
-  "docstring_argument_descriptions_are_correct": true/false,
+  "parameter_names_are_correct": true/false,
+  "parameter_types_are_correct": true/false,
+  "parameter_descriptions_are_correct": true/false,
   "corrected_class_docstring": {
     "correct_class_description": "One-line summary of what the class does",
     "correct_class_arguments": [
