@@ -32,10 +32,10 @@ class FunctionDocstring(BaseModel):
 class FunctionDocstringAssessment(BaseModel):
     function_name: str
 
-    parameter_names_are_correct: IssueFlag
-    parameter_types_are_correct: IssueFlag
-    parameter_descriptions_are_correct: IssueFlag
-    return_type_is_correct: IssueFlag
+    parameter_names_are_correct: bool
+    parameter_types_are_correct: bool
+    parameter_descriptions_are_correct: bool
+    return_type_is_correct: bool
 
     corrected_function_docstring: FunctionDocstring
 
