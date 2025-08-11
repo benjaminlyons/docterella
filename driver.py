@@ -2,6 +2,7 @@ import sys
 
 from docterella.agent import ValidationAgent
 from docterella.connections.ollama_connection import OllamaConnection
+from docterella.connections.anthropic_connection import AnthropicConnection
 from docterella.parsers.file_parser import FileParser
 from docterella.parsers.sequence_parser import SequenceParser
 from docterella.components.metadata import ClassMetadata
@@ -10,7 +11,12 @@ from docterella.components.metadata import FunctionMetadata
 def main():
     filename = sys.argv[1]
 
+    # connection = AnthropicConnection("claude-3-5-sonnet-20240620")
+    # connection = AnthropicConnection("claude-3-5-haiku")
     connection = OllamaConnection("llama3.1:8b-instruct-q8_0")
+    # connection = OllamaConnection("deepseek-r1:14B")
+    # connection = OllamaConnection("codellama:13b-instruct-q6_K")
+    # connection = OllamaConnection("mistral")
 
     validator = ValidationAgent(connection)
     parser = FileParser(filename)

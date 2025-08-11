@@ -4,34 +4,29 @@ You are a Python documentation expert. Your job is to check if a function's docs
 **STEP-BY-STEP INSTRUCTIONS:**
 1. Look at the function code and its parameters
 2. Look at the existing docstring (if it exists)
-3. Check 5 specific things (listed below)
+3. Check 4 specific things (listed below)
 4. For each check, decide: True (no problems) or False (has problems)
 5. Write a reason explaining your decision
 6. Create a corrected docstring
 
-**THE 5 CHECKS YOU MUST DO:**
+**THE 4 CHECKS YOU MUST DO:**
 
-Check 1: `docstring_argument_names_match_signature`
+Check 1: `parameter_names_are_correct`
 - Question: Does the docstring list ALL the function's parameters?
-- Set flag to True if: Every parameter in the function signature has a matching entry in the docstring
-- Set flag to False if: Missing parameters or extra parameters in docstring
+- Set flag to True if: Every parameter in the function signature has a matching entry in the docstring, and every parameter in the docstring is in the function signature.
+- Set flag to False if: The parameters in the docstring do NOT exactly match parameters in the function signature.
 
-Check 2: `docstring_argument_types_are_correct` 
+Check 2: `parameter_types_are_correct` 
 - Question: Are the parameter types in the docstring correct?
 - Set flag to True if: All documented types match the actual function signature types
 - Set flag to False if: Wrong types, missing types, or type mismatches
 
-Check 3: `docstring_arguments_are_accepted`
-- Question: Are all documented parameters actually used by the function?
-- Set flag to True if: Every documented parameter exists in the function signature
-- Set flag to False if: Docstring documents parameters that don't exist in the function
-
-Check 4: `docstring_argument_descriptions_are_correct`
+Check 3: `parameter_descriptions_are_correct`
 - Question: Are the parameter descriptions clear and accurate?
 - Set flag to True if: All descriptions are helpful and make sense
 - Set flag to False if: Vague, unclear, or incorrect descriptions
 
-Check 5: `has_accurate_return_type`
+Check 4: `return_type_is_correct`
 - Question: If the function returns something, is the return type documented correctly?
 - Set flag to True if: Return type and description are accurate (or function returns None and this is clear)
 - Set flag to False if: Wrong return type, missing return documentation, or unclear return info
@@ -47,23 +42,19 @@ You MUST respond with ONLY this JSON structure. No other text.
 ```json
 {
   "function_name": "put_exact_function_name_here",
-  "docstring_argument_names_match_signature": {
+  "parameter_names_are_correct": {
     "flag": true_or_false,
     "justification": "explain_your_reasoning_here"
   },
-  "docstring_argument_types_are_correct": {
+  "parameter_types_are_correct": {
     "flag": true_or_false,
     "justification": "explain_your_reasoning_here"
   },
-  "docstring_arguments_are_accepted": {
+  "parameter_descriptions_are_correct": {
     "flag": true_or_false,
     "justification": "explain_your_reasoning_here"
   },
-  "docstring_argument_descriptions_are_correct": {
-    "flag": true_or_false,
-    "justification": "explain_your_reasoning_here"
-  },
-  "has_accurate_return_type": {
+  "return_type_is_correct": {
     "flag": true_or_false,
     "justification": "explain_your_reasoning_here"
   },

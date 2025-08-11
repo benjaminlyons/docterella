@@ -30,12 +30,10 @@ class ValidationAgent:
             Return a JSON representation of the validation results, must be compliant
             with the `DocstringValidation` schema.
         """
-        source = function.source
-
-        prompt = f"{self.function_instructions}\n<code>{source}</code>\n"
-
         response = self.connection.prompt(
-            prompt, format=FunctionDocstringAssessment.model_json_schema()
+            instructions=self.function_instructions,
+            prompt=function.source,
+            format=FunctionDocstringAssessment.model_json_schema()
         )
 
         da = FunctionDocstringAssessment.model_validate_json(response)
