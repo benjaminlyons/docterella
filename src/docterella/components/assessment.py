@@ -16,10 +16,6 @@ class ReturnValue(BaseModel):
     data_type: str
     description: str
 
-class IssueFlag(BaseModel):
-    flag: bool
-    justification: str
-
 class FunctionDocstring(BaseModel):
     # one line description of the function 
     correct_function_description: str
@@ -30,7 +26,7 @@ class FunctionDocstring(BaseModel):
     correct_function_return_values: List[ReturnValue]
 
 class FunctionDocstringAssessment(BaseModel):
-    function_name: str
+    summary_of_findings: str
 
     parameter_names_are_correct: bool
     parameter_types_are_correct: bool
@@ -39,15 +35,12 @@ class FunctionDocstringAssessment(BaseModel):
 
     corrected_function_docstring: FunctionDocstring
 
-    summary_of_findings: str
 
 class ClassDocstring(BaseModel):
     correct_class_description: str
     correct_class_arguments: List[Argument]
 
 class ClassDocstringAssessment(BaseModel):
-    class_name: str
-
     parameter_names_are_correct: bool
     parameter_types_are_correct: bool
     parameter_descriptions_are_correct: bool
