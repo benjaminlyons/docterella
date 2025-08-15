@@ -1,0 +1,317 @@
+{
+  "MessageQueue": {
+    "parameter_names_are_correct": false,
+    "parameter_types_are_correct": true,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Handle message queuing and processing.",
+      "correct_class_arguments": [
+        {
+          "name": "queue_name",
+          "data_type": "str",
+          "description": "Name of the message queue."
+        },
+        {
+          "name": "max_size",
+          "data_type": "int",
+          "description": "Maximum number of messages in queue."
+        },
+        {
+          "name": "retry_attempts",
+          "data_type": "int",
+          "description": "Number of retry attempts for failed messages."
+        },
+        {
+          "name": "persistence",
+          "data_type": "bool",
+          "description": "Whether to persist messages to disk. Defaults to True."
+        }
+      ]
+    },
+    "summary_of_findings": "Missing 'retry_attempts' and 'persistence' parameters in docstring. All documented parameters have correct types and descriptions."
+  },
+  "ImageResizer": {
+    "parameter_names_are_correct": false,
+    "parameter_types_are_correct": false,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Resize and optimize images for web usage.",
+      "correct_class_arguments": [
+        {
+          "name": "input_path",
+          "data_type": "str",
+          "description": "Path to input image file."
+        },
+        {
+          "name": "quality",
+          "data_type": "int",
+          "description": "Image compression quality setting. Defaults to 85."
+        }
+      ]
+    },
+    "summary_of_findings": "Parameter 'input_path' documented as 'int' but should be 'str'. Parameter 'quality' documented as 'str' but should be 'int'. Parameter 'preserve_metadata' documented but not in constructor."
+  },
+  "PasswordValidator": {
+    "parameter_names_are_correct": false,
+    "parameter_types_are_correct": false,
+    "parameter_descriptions_are_correct": false,
+    "corrected_class_docstring": {
+      "correct_class_description": "Validate passwords against security requirements.",
+      "correct_class_arguments": [
+        {
+          "name": "min_length",
+          "data_type": "int",
+          "description": "Minimum required password length. Defaults to 8."
+        },
+        {
+          "name": "require_uppercase",
+          "data_type": "bool",
+          "description": "Whether to require uppercase characters. Defaults to True."
+        },
+        {
+          "name": "require_numbers",
+          "data_type": "bool",
+          "description": "Whether to require numeric characters. Defaults to True."
+        },
+        {
+          "name": "special_chars",
+          "data_type": "Optional[str]",
+          "description": "String of required special characters. Defaults to None."
+        }
+      ]
+    },
+    "summary_of_findings": "No docstring provided. All parameters need to be documented with their types and descriptions."
+  },
+  "NotificationService": {
+    "parameter_names_are_correct": false,
+    "parameter_types_are_correct": true,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Send notifications via multiple channels.",
+      "correct_class_arguments": [
+        {
+          "name": "email_enabled",
+          "data_type": "bool",
+          "description": "Whether email notifications are enabled."
+        },
+        {
+          "name": "sms_enabled",
+          "data_type": "bool",
+          "description": "Whether SMS notifications are enabled. Defaults to False."
+        }
+      ]
+    },
+    "summary_of_findings": "Docstring includes parameters 'webhook_url', 'rate_limit', and 'templates' that don't exist in constructor. Missing default value for 'sms_enabled'."
+  },
+  "HttpClient": {
+    "parameter_names_are_correct": true,
+    "parameter_types_are_correct": false,
+    "parameter_descriptions_are_correct": false,
+    "corrected_class_docstring": {
+      "correct_class_description": "HTTP client for making REST API requests.",
+      "correct_class_arguments": [
+        {
+          "name": "base_url",
+          "data_type": "str",
+          "description": "Base URL for API requests."
+        },
+        {
+          "name": "timeout",
+          "data_type": "float",
+          "description": "Request timeout in seconds. Defaults to 30.0."
+        },
+        {
+          "name": "retries",
+          "data_type": "int",
+          "description": "Number of retry attempts for failed requests. Defaults to 3."
+        },
+        {
+          "name": "user_agent",
+          "data_type": "str",
+          "description": "User agent string for requests. Defaults to 'HttpClient/1.0'."
+        }
+      ]
+    },
+    "summary_of_findings": "Parameter 'timeout' documented as 'int' but should be 'float'. Descriptions are too vague ('The URL', 'The timeout', etc.) and missing default values."
+  },
+  "BackupManager": {
+    "parameter_names_are_correct": false,
+    "parameter_types_are_correct": true,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Manage automated backups of files and databases.",
+      "correct_class_arguments": [
+        {
+          "name": "backup_directory",
+          "data_type": "str",
+          "description": "Directory where backups will be stored."
+        },
+        {
+          "name": "retention_days",
+          "data_type": "int",
+          "description": "Number of days to keep backups. Defaults to 30."
+        },
+        {
+          "name": "compression_enabled",
+          "data_type": "bool",
+          "description": "Whether to compress backup files. Defaults to True."
+        },
+        {
+          "name": "max_backup_size",
+          "data_type": "int",
+          "description": "Maximum size in bytes for backup files. Defaults to 1073741824."
+        }
+      ]
+    },
+    "summary_of_findings": "Missing 'max_backup_size' parameter in docstring. All documented parameters have correct types and descriptions."
+  },
+  "VideoProcessor": {
+    "parameter_names_are_correct": true,
+    "parameter_types_are_correct": false,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Process video files with various transformations.",
+      "correct_class_arguments": [
+        {
+          "name": "codec",
+          "data_type": "str",
+          "description": "Video codec to use for encoding."
+        },
+        {
+          "name": "bitrate",
+          "data_type": "int",
+          "description": "Target bitrate in kbps. Defaults to 2000."
+        },
+        {
+          "name": "resolution",
+          "data_type": "Tuple[int, int]",
+          "description": "Output resolution as (width, height). Defaults to (1920, 1080)."
+        },
+        {
+          "name": "audio_enabled",
+          "data_type": "bool",
+          "description": "Whether to include audio track. Defaults to True."
+        },
+        {
+          "name": "metadata",
+          "data_type": "Optional[Dict[str, Any]]",
+          "description": "Custom metadata to embed in output. Defaults to None."
+        }
+      ]
+    },
+    "summary_of_findings": "Parameter 'codec' documented as 'List[str]' but should be 'str'. All other parameters and descriptions are correct."
+  },
+  "EventScheduler": {
+    "parameter_names_are_correct": true,
+    "parameter_types_are_correct": true,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Schedule and manage recurring events.",
+      "correct_class_arguments": [
+        {
+          "name": "timezone",
+          "data_type": "str",
+          "description": "Timezone for event scheduling (e.g., 'UTC', 'America/New_York')."
+        },
+        {
+          "name": "max_events",
+          "data_type": "int",
+          "description": "Maximum number of events to track simultaneously. Defaults to 1000."
+        },
+        {
+          "name": "persist_to_disk",
+          "data_type": "bool",
+          "description": "Whether to save events to disk for persistence. Defaults to False."
+        },
+        {
+          "name": "notification_buffer",
+          "data_type": "timedelta",
+          "description": "How far in advance to trigger notifications. Defaults to 15 minutes."
+        }
+      ]
+    },
+    "summary_of_findings": "Perfect docstring with all parameters correctly documented with accurate types and descriptions including default values."
+  },
+  "SearchEngine": {
+    "parameter_names_are_correct": true,
+    "parameter_types_are_correct": true,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Full-text search engine with indexing and ranking.",
+      "correct_class_arguments": [
+        {
+          "name": "index_path",
+          "data_type": "Path",
+          "description": "Directory path where search index will be stored."
+        },
+        {
+          "name": "language",
+          "data_type": "str",
+          "description": "Language for text processing and stemming. Defaults to 'english'."
+        },
+        {
+          "name": "max_results",
+          "data_type": "int",
+          "description": "Maximum number of search results to return. Defaults to 50."
+        },
+        {
+          "name": "fuzzy_matching",
+          "data_type": "bool",
+          "description": "Whether to enable fuzzy string matching. Defaults to True."
+        },
+        {
+          "name": "boost_factors",
+          "data_type": "Optional[Dict[str, float]]",
+          "description": "Field boost factors for ranking. Defaults to None."
+        },
+        {
+          "name": "stop_words",
+          "data_type": "Optional[Set[str]]",
+          "description": "Custom stop words to filter out. Defaults to None."
+        }
+      ]
+    },
+    "summary_of_findings": "Perfect docstring with all parameters correctly documented with accurate complex types and descriptions including default values."
+  },
+  "MetricsCollector": {
+    "parameter_names_are_correct": true,
+    "parameter_types_are_correct": true,
+    "parameter_descriptions_are_correct": true,
+    "corrected_class_docstring": {
+      "correct_class_description": "Collect and aggregate application performance metrics.",
+      "correct_class_arguments": [
+        {
+          "name": "collection_interval",
+          "data_type": "float",
+          "description": "Interval between metric collections in seconds. Defaults to 60.0."
+        },
+        {
+          "name": "storage_backend",
+          "data_type": "str",
+          "description": "Backend for metric storage ('memory', 'redis', 'influxdb'). Defaults to 'memory'."
+        },
+        {
+          "name": "retention_period",
+          "data_type": "timedelta",
+          "description": "How long to retain metrics data. Defaults to 24 hours."
+        },
+        {
+          "name": "enable_histograms",
+          "data_type": "bool",
+          "description": "Whether to collect histogram metrics. Defaults to True."
+        },
+        {
+          "name": "tags",
+          "data_type": "Optional[Dict[str, str]]",
+          "description": "Default tags to apply to all metrics. Defaults to None."
+        },
+        {
+          "name": "batch_size",
+          "data_type": "int",
+          "description": "Number of metrics to batch before writing. Defaults to 100."
+        }
+      ]
+    },
+    "summary_of_findings": "Perfect docstring with all parameters correctly documented with accurate types and descriptions including default values. This is the correct example."
+  }
+}
