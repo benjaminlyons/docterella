@@ -233,7 +233,7 @@ You MUST respond with ONLY this JSON structure. No other text.
 
 ```json
 {
-  "function_name": "put_exact_function_name_here",
+  "summary_of_findings": "Overall summary of what you found and what you fixed"
   "parameter_names_are_correct": true_or_false,
   "parameter_types_are_correct": true_or_false,
   "parameter_descriptions_are_correct": true_or_false,
@@ -254,7 +254,6 @@ You MUST respond with ONLY this JSON structure. No other text.
       }
     ]
   },
-  "summary_of_findings": "Overall summary of what you found and what you fixed"
 }
 ```
 

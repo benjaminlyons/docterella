@@ -20,7 +20,7 @@ class AnthropicConnection(BaseConnection):
             max_tokens=1000,
             system=[
                 {"type": "text", "text": instructions, "cache_control": {"type": "ephemeral"}},
-                {"type": "text", "text": f"Your entire response must be valid, parseable JSON that conforms to this JSON schema\n{format}", "cache_control": {"type": "ephemeral"}},
+                {"type": "text", "text": f"Your entire response MUST be ONLY perfect, VALID, PARSEABLE JSON that conforms to this JSON schema\n{format}", "cache_control": {"type": "ephemeral"}},
             ],
             messages=[
                 {
@@ -36,6 +36,7 @@ class AnthropicConnection(BaseConnection):
 
         result = "{" + message.content[0].text
 
-        result = result.replace("'\n\t", "")
+        control_chars = ["\n", "\t", "\r"]
+        result = result.translate(str.maketrans({c: "" for c in control_chars}))
         
         return result

@@ -11,15 +11,11 @@ from docterella.components.metadata import FunctionMetadata
 def main():
     filename = sys.argv[1]
 
-    connection = AnthropicConnection("claude-3-haiku-20240307")
+    # connection = AnthropicConnection("claude-3-5-haiku-20241022")
 
     # connection = OllamaConnection("llama3.1:8b-instruct-q8_0")
-    # connection = OllamaConnection("deepseek-r1:14B")
-
     # connection = OllamaConnection("mistral:7b-instruct-q8_0")
     # connection = OllamaConnection("gemma3:12b-it-qat")
-    # connection = OllamaConnection("codellama:13b-instruct")
-    # connection = OllamaConnection("mistral-nemo:12b-instruct-2407-q6_K")
 
     validator = ValidationAgent(connection)
     parser = FileParser(filename)

@@ -44,10 +44,15 @@ class ValidationAgent:
         source = cls.constructor.source
         docstring = cls.docstring
 
-        prompt = f"{self.class_instructions}\n<docstring>{docstring}</docstring>\n<constructor>{source}</constructor>\n"
+        prompt = (
+            f"<docstring>{docstring}</docstring>\n"
+            f"<constructor>{source}</constructor>\n"
+        )
 
         response = self.connection.prompt(
-            prompt, format=ClassDocstringAssessment.model_json_schema()
+            instructions=self.class_instructions,
+            prompt=prompt,
+            format=ClassDocstringAssessment.model_json_schema(),
         )
 
         cda = ClassDocstringAssessment.model_validate_json(response)
