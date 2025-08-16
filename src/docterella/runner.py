@@ -15,3 +15,6 @@ class Runner:
 
             if isinstance(node, FunctionMetadata):
                 yield self.agent.validate_function(node)
+
+    def run(self):
+        return [res for res in self.validate_sequence()]

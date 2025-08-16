@@ -21,4 +21,10 @@ class ValidationResults:
     
     def __str__(self):
         return self.to_json()
+    
+    def get_type(self) -> str:
+        return self.metadata.type
 
+    @property
+    def docstring(self):
+        return self.assessment.docstring

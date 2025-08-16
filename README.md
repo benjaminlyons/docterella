@@ -1,3 +1,3 @@
-3 Docterella
+Docterella
 
 Simple app for validating and fixing documentation.

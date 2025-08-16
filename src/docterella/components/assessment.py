@@ -35,6 +35,10 @@ class FunctionDocstringAssessment(BaseModel):
 
     corrected_function_docstring: FunctionDocstring
 
+    @property
+    def docstring(self):
+        return self.corrected_function_docstring
+
 
 class ClassDocstring(BaseModel):
     correct_class_description: str
@@ -48,4 +52,8 @@ class ClassDocstringAssessment(BaseModel):
     corrected_class_docstring: ClassDocstring
 
     summary_of_findings: str
+
+    @property
+    def docstring(self):
+        return self.corrected_class_docstring
 
