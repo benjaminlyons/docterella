@@ -1,15 +1,15 @@
 from abc import ABC
 from abc import abstractmethod
 
-from docterella.components.assessment import FunctionDocstring
-from docterella.components.assessment import ClassDocstring
+from docterella.objects.base_assessment import FunctionDocstring
+from docterella.objects.base_assessment import ClassDocstring
 
 from typing import List
-from docterella.components.assessment import Argument
-from docterella.components.assessment import ReturnValue
-from docterella.components.results import ValidationResults
+from docterella.objects.base_assessment import Argument
+from docterella.objects.base_assessment import ReturnValue
+from docterella.objects.results import ValidationResults
 
-from docterella.components.metadata import MetaDataTypes
+from docterella.objects.metadata import MetaDataTypes
 
 class BaseBuilder(ABC):
     def __init__(self, argument_listing_format: str, return_listing_format: str):

@@ -1,6 +1,6 @@
 import ast
 import astor
-from docterella.components.metadata import ClassMetadata
+from docterella.objects.metadata import ClassMetadata
 from docterella.parsers.function_parser import parse_function
 
 def parse_class(node: ast.ClassDef) -> ClassMetadata:

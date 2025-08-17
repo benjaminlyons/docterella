@@ -1,7 +1,7 @@
 import ast
 import astor
 
-from docterella.components.metadata import FunctionMetadata
+from docterella.objects.metadata import FunctionMetadata
 
 def parse_function(node: ast.FunctionDef) -> FunctionMetadata:
     if not isinstance(node, ast.FunctionDef):

@@ -1,11 +1,11 @@
-from docterella.components.assessment import FunctionDocstringAssessment
+from docterella.objects.base_assessment import BaseFunctionDocstringAssessment
 from docterella.parsers.function_parser import FunctionMetadata
 
 import json
 
 class ValidationResults:
     def __init__(
-        self, metadata: FunctionMetadata, assessment: FunctionDocstringAssessment
+        self, metadata: FunctionMetadata, assessment: BaseFunctionDocstringAssessment
     ):
         self.metadata = metadata
         self.assessment = assessment

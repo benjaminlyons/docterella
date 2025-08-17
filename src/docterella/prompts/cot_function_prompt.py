@@ -1,24 +1,48 @@
 COT_FUNCTION_PROMPT = """
 You are a Python documentation expert.
-Analyze the provided Python function and evaluate its docstring for accuracy.
+Analyze the provided Python function and evaluate its docstring for accuracy using step-by-step reasoning.
 
 **YOUR TASK:**
-1. Examine the function signature (parameter names, parameter types, return values)
-2. Analyze the existing docstring (if any)
-3. Identify specific issues with the docstring
-4. Provide corrections following the Google docstring format
+Work through each step systematically to analyze the function signature and docstring, then provide your final assessment.
 
-**VALIDATION CHECKS:**
-Evaluate these 4 aspects and set the corresponding booleam fields:
+**STEP-BY-STEP REASONING PROCESS:**
 
-1. `parameter_names_are_correct`: Do ALL function parameters have corresponding documentation entries? (true/false)
-2. `parameter_types_are_correct`: Are all the documented parameter types accurate? (true/false)
-4. `parameter_descriptions_are_correct`: Are all parameter descriptions accurate and helpful? (true/false)
-5. `return_type_is_correct`: If function returns a value, is the return type correctly documented? (true/false)
+**Step 1: Extract Function Components**
+- List all parameters from function signature (exclude 'self')
+- Note parameter types and default values
+- Identify return type annotation
+- Extract parameters documented in existing docstring
+
+**Step 2: Compare Parameters**
+- Find missing parameters: in signature but not in docstring
+- Find extra parameters: in docstring but not in signature
+- Check if all signature parameters are documented
+
+**Step 3: Validate Types**
+- Compare each documented parameter type vs signature type
+- Check return type documentation vs signature return type
+- Note any type mismatches
+
+**Step 4: Assess Descriptions**
+- Check if parameter descriptions are helpful (not vague like "The value")
+- Verify default values are mentioned for optional parameters
+- Evaluate return description quality
+
+**Step 5: Set Validation Flags**
+- `parameter_names_are_correct`: All signature params documented, no extras
+- `parameter_types_are_correct`: All documented types match signature
+- `parameter_descriptions_are_correct`: All descriptions are clear and helpful
+- `return_type_is_correct`: Return type and description match signature
+
+**Step 6: Generate Corrections**
+- Create proper function description (start with verb)
+- Fix parameter documentation with correct types and clear descriptions
+- Fix return documentation to match signature
+- Summarize all issues found and corrections made
 
 **EXAMPLE ANALYSES:**
 
-**EXAMPLE 1 - Function with missing parameter:**
+**EXAMPLE 1 - Missing Parameter:**
 ```python
 def process_data(filename: str, encoding: str = 'utf-8') -> Dict[str, Any]:
     \"\"\"Process data from a file.
@@ -33,17 +57,37 @@ def process_data(filename: str, encoding: str = 'utf-8') -> Dict[str, Any]:
     \"\"\"
 ```
 
-Step 1 - Extract parameters from signature:
-- filename: str (required)
-- encoding: str (optional, default 'utf-8')
+**Step 1: Extract Function Components**
+- Signature parameters: filename (str), encoding (str, default 'utf-8')
+- Return type: Dict[str, Any]
+- Docstring parameters: filename (str)
 
-Analysis:
-- parameter_names_are_correct: false (missing 'encoding' parameter in docstring)
-- parameter_types_are_correct: true (filename type is correct)
-- parameter_descriptions_are_correct: true (filename description is clear)
-- return_type_is_correct: true (return type and description are accurate)
+**Step 2: Compare Parameters**
+- Missing parameters: encoding
+- Extra parameters: none
+- All signature parameters documented: NO
 
-**EXAMPLE 2 - Function with wrong parameter type:**
+**Step 3: Validate Types**
+- filename type match: YES (str = str)
+- Return type match: YES (Dict[str, Any] = Dict[str, Any])
+
+**Step 4: Assess Descriptions**
+- filename description helpful: YES
+- Default values mentioned: NO (encoding default missing)
+- Return description helpful: YES
+
+**Step 5: Set Validation Flags**
+- parameter_names_are_correct: false (missing encoding)
+- parameter_types_are_correct: true (filename type correct)
+- parameter_descriptions_are_correct: true (filename description clear)
+- return_type_is_correct: true (return type and description accurate)
+
+**Step 6: Generate Corrections**
+- Add missing encoding parameter with type and default value
+- Keep existing good descriptions
+- Summary: Missing 'encoding' parameter in docstring
+
+**EXAMPLE 2 - Wrong Parameter Type:**
 ```python
 def calculate_age(birth_year: int, current_year: int) -> int:
     \"\"\"Calculate person's age.
@@ -60,62 +104,70 @@ def calculate_age(birth_year: int, current_year: int) -> int:
     \"\"\"
 ```
 
-Step 1 - Extract parameters from signature:
-- birth_year: int (required)
-- current_year: int (required)
+**Step 1: Extract Function Components**
+- Signature parameters: birth_year (int), current_year (int)
+- Return type: int
+- Docstring parameters: birth_year (str), current_year (int)
 
-Analysis:
+**Step 2: Compare Parameters**
+- Missing parameters: none
+- Extra parameters: none
+- All signature parameters documented: YES
+
+**Step 3: Validate Types**
+- birth_year type match: NO (int ≠ str)
+- current_year type match: YES (int = int)
+- Return type match: YES (int = int)
+
+**Step 4: Assess Descriptions**
+- birth_year description helpful: YES
+- current_year description helpful: YES
+- Return description helpful: YES
+
+**Step 5: Set Validation Flags**
 - parameter_names_are_correct: true (all parameters present)
-- parameter_types_are_correct: false (birth_year should be 'int' not 'str')
-- parameter_descriptions_are_correct: true (descriptions are clear)
-- return_type_is_correct: true (return type is correct)
+- parameter_types_are_correct: false (birth_year type wrong)
+- parameter_descriptions_are_correct: true (descriptions clear)
+- return_type_is_correct: true (return type correct)
 
-**EXAMPLE 3 - Function with no docstring:**
+**Step 6: Generate Corrections**
+- Fix birth_year type from str to int
+- Keep all descriptions
+- Summary: Parameter 'birth_year' documented as 'str' but should be 'int'
+
+**EXAMPLE 3 - No Docstring:**
 ```python
 def add_numbers(x: int, y: int) -> int:
     return x + y
 ```
 
-Step 1 - Extract parameters from signature:
-- x: int (required)
-- y: int (required)
+**Step 1: Extract Function Components**
+- Signature parameters: x (int), y (int)
+- Return type: int
+- Docstring parameters: none (no docstring)
 
-Analysis:
-- parameter_names_are_correct: false (no docstring at all)
-- parameter_types_are_correct: false (no docstring at all)
-- parameter_descriptions_are_correct: false (no docstring at all)
-- return_type_is_correct: false (no docstring at all)
+**Step 2: Compare Parameters**
+- Missing parameters: x, y
+- Extra parameters: none
+- All signature parameters documented: NO
 
-**EXAMPLE 4 - Function with extra parameter in docstring:**
-```python
-def format_name(first: str, last: str) -> str:
-    \"\"\"Format a person's full name.
-    
-    Args:
-        first: str
-            First name.
-        middle: str
-            Middle name.
-        last: str
-            Last name.
-            
-    Returns:
-        str
-            Formatted full name.
-    \"\"\"
-```
+**Step 3: Validate Types**
+- No types to validate (no docstring)
 
-Step 1 - Extract parameters from signature:
-- first: str (required)
-- last: str (required)
+**Step 4: Assess Descriptions**
+- No descriptions to assess (no docstring)
 
-Analysis:
-- parameter_names_are_correct: false (docstring includes 'middle' parameter that doesn't exist in function)
-- parameter_types_are_correct: true (existing parameters have correct types)
-- parameter_descriptions_are_correct: true (descriptions are clear)
-- return_type_is_correct: true (return type is correct)
+**Step 5: Set Validation Flags**
+- parameter_names_are_correct: false (no docstring)
+- parameter_types_are_correct: false (no docstring)
+- parameter_descriptions_are_correct: false (no docstring)
+- return_type_is_correct: false (no docstring)
 
-**EXAMPLE 5 - Function with vague descriptions:**
+**Step 6: Generate Corrections**
+- Create complete docstring with all parameters and return
+- Summary: No docstring provided. All parameters and return value need documentation
+
+**EXAMPLE 4 - Vague Descriptions:**
 ```python
 def connect_database(host: str, port: int, username: str) -> Connection:
     \"\"\"Connect to database.
@@ -134,106 +186,53 @@ def connect_database(host: str, port: int, username: str) -> Connection:
     \"\"\"
 ```
 
-Step 1 - Extract parameters from signature:
-- host: str (required)
-- port: int (required)
-- username: str (required)
+**Step 1: Extract Function Components**
+- Signature parameters: host (str), port (int), username (str)
+- Return type: Connection
+- Docstring parameters: host (str), port (int), username (str)
 
-Analysis:
+**Step 2: Compare Parameters**
+- Missing parameters: none
+- Extra parameters: none
+- All signature parameters documented: YES
+
+**Step 3: Validate Types**
+- host type match: YES (str = str)
+- port type match: YES (int = int)
+- username type match: YES (str = str)
+- Return type match: YES (Connection = Connection)
+
+**Step 4: Assess Descriptions**
+- host description helpful: NO (too vague: "The host")
+- port description helpful: NO (too vague: "The port")
+- username description helpful: NO (too vague: "The user")
+- Return description helpful: SOMEWHAT (could be more specific)
+
+**Step 5: Set Validation Flags**
 - parameter_names_are_correct: true (all parameters present)
-- parameter_types_are_correct: true (all types are correct)
-- parameter_descriptions_are_correct: false (descriptions are too vague - "The host", "The port", "The user")
-- return_type_is_correct: true (return type is correct but could be more descriptive)
+- parameter_types_are_correct: true (all types correct)
+- parameter_descriptions_are_correct: false (descriptions too vague)
+- return_type_is_correct: true (return type correct)
 
-**EXAMPLE 6 - Function with missing return documentation:**
-```python
-def validate_email(email: str) -> bool:
-    \"\"\"Validate an email address.
-    
-    Args:
-        email: str
-            Email address to validate.
-    \"\"\"
-```
-
-Step 1 - Extract parameters from signature:
-- email: str (required)
-
-Analysis:
-- parameter_names_are_correct: true (all parameters present)
-- parameter_types_are_correct: true (email type is correct)
-- parameter_descriptions_are_correct: true (description is clear)
-- return_type_is_correct: false (missing return documentation entirely)
-
-**EXAMPLE 7 - Function with complex types and defaults:**
-```python
-def process_items(items: List[Dict[str, Any]], max_count: int = 100, filters: Optional[Set[str]] = None) -> Tuple[List[str], int]:
-    \"\"\"Process a list of item dictionaries.
-    
-    Args:
-        items: List[Dict[str, Any]]
-            List of item dictionaries to process.
-        max_count: int
-            Maximum number of items to process. Defaults to 100.
-        filters: Optional[Set[str]]
-            Set of filter strings to apply. Defaults to None.
-            
-    Returns:
-        Tuple[List[str], int]
-            Tuple containing list of processed item names and count of items processed.
-    \"\"\"
-```
-
-Step 1 - Extract parameters from signature:
-- items: List[Dict[str, Any]] (required)
-- max_count: int (optional, default 100)
-- filters: Optional[Set[str]] (optional, default None)
-
-Analysis:
-- parameter_names_are_correct: true (all parameters present and exact match)
-- parameter_types_are_correct: true (all complex types match exactly)
-- parameter_descriptions_are_correct: true (all descriptions are clear and mention defaults)
-- return_type_is_correct: true (complex return type documented correctly)
-
-**EXAMPLE 8 - Perfect docstring:**
-```python
-def send_email(recipient: str, subject: str, body: str, attachments: Optional[List[str]] = None) -> bool:
-    \"\"\"Send an email to a recipient.
-    
-    Args:
-        recipient: str
-            Email address of the recipient.
-        subject: str
-            Subject line of the email.
-        body: str
-            Body content of the email.
-        attachments: Optional[List[str]]
-            List of file paths to attach. Defaults to None.
-            
-    Returns:
-        bool
-            true if email was sent successfully, false otherwise.
-    \"\"\"
-```
-
-Step 1 - Extract parameters from signature:
-- recipient: str (required)
-- subject: str (required)
-- body: str (required)
-- attachments: Optional[List[str]] (optional, default None)
-
-Analysis:
-- parameter_names_are_correct: true (all parameters present and exact match)
-- parameter_types_are_correct: true (all types match exactly)
-- parameter_descriptions_are_correct: true (all descriptions are clear and helpful)
-- return_type_is_correct: true (return type and description are accurate)
+**Step 6: Generate Corrections**
+- Improve all parameter descriptions to be more specific
+- Enhance return description
+- Summary: All parameter descriptions are too vague and need to be more helpful
 
 **REQUIRED JSON OUTPUT:**
 You MUST respond with ONLY this JSON structure. No other text.
 
 ```json
 {
-  "summary_of_findings": "Overall summary of what you found and what you fixed"
+  "reasoning": {
+    "signature_parameters": ["list of parameter names from signature"],
+    "docstring_parameters": ["list of parameter names from docstring"],
+    "missing_params_from_docstring": ["parameters in signature but not docstring"],
+    "extra_params_in_docstring": ["parameters in docstring but not signature"],
+    "incorrect_param_descriptions": ["parameters with vague/unhelpful descriptions"],
+    "return_type_matches": true_or_false
+  },
+  "summary_of_findings": "Overall summary of what you found and what you fixed",
   "parameter_names_are_correct": true_or_false,
   "parameter_types_are_correct": true_or_false,
   "parameter_descriptions_are_correct": true_or_false,
@@ -253,10 +252,9 @@ You MUST respond with ONLY this JSON structure. No other text.
         "description": "what_gets_returned"
       }
     ]
-  },
+  }
 }
 ```
-
 
 **RULES FOR GOOD DOCSTRINGS:**
 - Function description: Start with a verb ("Calculate the sum" not "Calculates the sum")
@@ -266,18 +264,11 @@ You MUST respond with ONLY this JSON structure. No other text.
 - For optional parameters with defaults, mention the default value
 
 **CRITICAL REMINDERS:**
+- Work through ALL 6 steps systematically
 - If there's no docstring at all, set ALL flags to false
-- Look at the actual function code, not just the docstring
 - Use the exact types from the function signature
-- Be specific in your justifications
-- The corrected docstring should fix all the problems you found
-
-**PARAMETER EXTRACTION CHECKLIST:**
-- I have identified all parameters in the function signature
-= I have noted their types (if provided)
-- I have noted any default values
-- I have excluded 'self' from instance methods
-- I have not invented any parameters
+- The corrected docstring should fix all problems you found
+- Fill in the reasoning section with your step-by-step analysis
 
 RESPOND WITH ONLY THE JSON. NO OTHER TEXT.
 """

@@ -1,7 +1,7 @@
 from docterella.parsers.sequence_parser import SequenceParser
-from docterella.validators.agent import ValidationAgent
-from docterella.components.metadata import ClassMetadata
-from docterella.components.metadata import FunctionMetadata
+from docterella.validators.base_agent import ValidationAgent
+from docterella.objects.metadata import ClassMetadata
+from docterella.objects.metadata import FunctionMetadata
 
 class Runner:
     def __init__(self, parser: SequenceParser, agent: ValidationAgent):

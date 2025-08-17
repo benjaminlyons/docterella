@@ -8,14 +8,14 @@ from typing import List
 from docterella.connections.base_connection import BaseConnection
 from docterella.connections.anthropic_connection import AnthropicConnection
 from docterella.connections.ollama_connection import OllamaConnection
-from docterella.validators.agent import ValidationAgent
+from docterella.validators.base_agent import ValidationAgent
 from docterella.parsers.file_parser import FileParser
-from docterella.components.assessment import ClassDocstringAssessment
-from docterella.components.assessment import FunctionDocstringAssessment
-from docterella.components.assessment import ClassDocstring
-from docterella.components.assessment import FunctionDocstring
-from docterella.components.assessment import ReturnValue
-from docterella.components.assessment import Argument
+from docterella.objects.base_assessment import BaseClassDocstringAssessment
+from docterella.objects.base_assessment import BaseFunctionDocstringAssessment
+from docterella.objects.base_assessment import ClassDocstring
+from docterella.objects.base_assessment import FunctionDocstring
+from docterella.objects.base_assessment import ReturnValue
+from docterella.objects.base_assessment import Argument
 from docterella.runner import Runner
 
 @dataclass
@@ -43,16 +43,15 @@ def main():
     This function sets up and runs the benchmarking process using a specified model.
     """
     models = [
+        # "claude-sonnet-4-20250514",
         # "claude-3-5-haiku-20241022",
         # "llama3.1:8b-instruct-q8_0",
-        # "mistral:7b-instruct-q8_0",
         # "phi4-mini-reasoning:3.8b",
         # "phi4-mini:latest",
         # "deepseek-r1:8b",
         # "granite3.3:8b",
         # "phi3:14b-medium-128k-instruct-q4_K_M",
         # "phi4:latest",
-        # "gemma3:12b-it-qat",
         # "gemma3:4b-it-qat",
         # "qwen3:latest",
         # "mistral-nemo:12b",
@@ -139,10 +138,25 @@ def _benchmark_helper(
     for result in runner.validate_sequence():
         expected = expected_response_dict[result.metadata.name]
 
-        if isinstance(result.assessment, ClassDocstringAssessment):
-            expected_assessment = ClassDocstringAssessment.model_validate(expected)
+        if isinstance(result.assessment, BaseClassDocstringAssessment):
+            expected["reasoning"] = {
+                    "signature_parameters": [],
+                    "docstring_parameters": [],
+                    "missing_params_from_docstring": [],
+                    "extra_params_in_docstring": [],
+                    "incorrect_param_descriptions": [],
+            }
+            expected_assessment = BaseClassDocstringAssessment.model_validate(expected)
         else:
-            expected_assessment = FunctionDocstringAssessment.model_validate(expected)
+            expected["reasoning"] = {
+                    "signature_parameters": [],
+                    "docstring_parameters": [],
+                    "missing_params_from_docstring": [],
+                    "extra_params_in_docstring": [],
+                    "incorrect_param_descriptions": [],
+                    "return_type_matchs": True
+            }
+            expected_assessment = BaseFunctionDocstringAssessment.model_validate(expected)
 
         assessment = result.assessment
 
