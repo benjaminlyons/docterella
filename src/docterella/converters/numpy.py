@@ -25,7 +25,9 @@ class NumpyStyleBuilder(BaseBuilder):
         if return_vals:
             output += f"\nReturns\n"
             output +=    "-------\n"
-            output += f"{return_vals}"
+            output += f"{return_vals}\n"
+
+        output += "\"\"\""
 
         return output
 

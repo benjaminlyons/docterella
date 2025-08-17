@@ -3,6 +3,7 @@ import ast
 from pydantic import BaseModel, ConfigDict
 from abc import ABC
 from typing import Optional
+from typing import ClassVar
 from enum import Enum
 
 class MetaDataTypes(Enum):
@@ -17,10 +18,10 @@ class Metadata(BaseModel, ABC):
     source: str
 
 class FunctionMetadata(Metadata):
-    type = MetaDataTypes.FUNCTION_TYPE
+    type: ClassVar[str] = MetaDataTypes.FUNCTION_TYPE
 
 class ClassMetadata(Metadata):
+    type: ClassVar[str] = MetaDataTypes.CLASS_TYPE
+
     docstring: Optional[str] = ""
     constructor: FunctionMetadata
-
-    type = MetaDataTypes.CLASS_TYPE
