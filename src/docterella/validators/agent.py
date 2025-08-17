@@ -13,7 +13,7 @@ from docterella.parsers.class_parser import ClassMetadata
 class ValidationAgent:
     def __init__(self, connection: BaseConnection):
         self.connection = connection
-        self.function_instructions = FUNCTION_PROMPT
+        self.function_instructions = FUNCTION_PROMPT # COT_FUNCTION_PROMPT
         self.class_instructions = CLASS_PROMPT
 
     def validate_function(self, function: FunctionMetadata):
@@ -36,7 +36,11 @@ class ValidationAgent:
             format=FunctionDocstringAssessment.model_json_schema()
         )
 
-        da = FunctionDocstringAssessment.model_validate_json(response)
+        try:
+            da = FunctionDocstringAssessment.model_validate_json(response)
+        except Exception as e:
+            print(response)
+            raise e
 
         return ValidationResults(function, da)
     
@@ -55,6 +59,10 @@ class ValidationAgent:
             format=ClassDocstringAssessment.model_json_schema(),
         )
 
-        cda = ClassDocstringAssessment.model_validate_json(response)
-
+        try:
+            cda = ClassDocstringAssessment.model_validate_json(response)
+        except Exception as e:
+            print(response)
+            raise e
+        
         return ValidationResults(cls, cda)

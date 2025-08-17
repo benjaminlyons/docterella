@@ -43,11 +43,20 @@ def main():
     This function sets up and runs the benchmarking process using a specified model.
     """
     models = [
-        "claude-3-5-haiku-20241022",
-        "llama3.1:8b-instruct-q8_0",
-        "phi3:14b-medium-128k-instruct-q4_K_M",
-        "mistral:7b-instruct-q8_0",
-        "phi4-mini-reasoning:3.8b",
+        # "claude-3-5-haiku-20241022",
+        # "llama3.1:8b-instruct-q8_0",
+        # "mistral:7b-instruct-q8_0",
+        # "phi4-mini-reasoning:3.8b",
+        # "phi4-mini:latest",
+        # "deepseek-r1:8b",
+        # "granite3.3:8b",
+        # "phi3:14b-medium-128k-instruct-q4_K_M",
+        # "phi4:latest",
+        # "gemma3:12b-it-qat",
+        # "gemma3:4b-it-qat",
+        # "qwen3:latest",
+        # "mistral-nemo:12b",
+        "starcoder2:7b",
     ]
 
     for model in models: 
@@ -75,14 +84,16 @@ def benchmark(model: str):
     connection = load_model(model)
 
     metrics = []
+    responses = []
     for case, input_path, response_path in paths:
         metric, response = _benchmark_helper(connection, input_path, response_path)
         metric = metric.rename({col: f"{col}_{case}" for col in metric.index})
         metrics.append(metric)
+        responses.extend(response)
 
     metrics_series = pd.concat(metrics)
 
-    save_model_response(model, response, metrics_series)
+    save_model_response(model, responses, metrics_series)
 
 def load_model(model):
     """

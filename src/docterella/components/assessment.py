@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 
 from typing import List
+from typing import Dict
+from typing import Optional
 
 class Argument(BaseModel):
     # name of the argument
@@ -25,7 +27,16 @@ class FunctionDocstring(BaseModel):
 
     correct_function_return_values: List[ReturnValue]
 
+class FunctionReasoning(BaseModel):
+    signature_parameters: List[str]
+    docstring_parameters: List[str]
+    missing_params_from_docstring: List[str]
+    extra_params_in_docstring: List[str]
+    incorrect_param_descriptions: List[str]
+    return_type_matchs: List[str]
+
 class FunctionDocstringAssessment(BaseModel):
+    reasoning: FunctionReasoning
     summary_of_findings: str
 
     parameter_names_are_correct: bool
@@ -45,6 +56,7 @@ class ClassDocstring(BaseModel):
     correct_class_arguments: List[Argument]
 
 class ClassDocstringAssessment(BaseModel):
+    reasoning: Optional[str] = ""
     parameter_names_are_correct: bool
     parameter_types_are_correct: bool
     parameter_descriptions_are_correct: bool

@@ -12,8 +12,10 @@ from docterella.converters.google import GoogleStyleBuilder
 def main():
     filename = sys.argv[1]
 
-    connection = AnthropicConnection("claude-3-5-haiku-20241022")
-    #connection = OllamaConnection("llama3.1:8b-instruct-q8_0")
+    #connection = AnthropicConnection("claude-3-5-haiku-20241022")
+    # connection = OllamaConnection("llama3.1:8b-instruct-q8_0")
+    connection = OllamaConnection("phi4-mini:latest")
+    # connection = OllamaConnection("phi4-mini-reasoning:3.8b")
 
     validator = ValidationAgent(connection)
     parser = FileParser(filename)
@@ -28,7 +30,7 @@ def main():
     for res in results:
         print(res)
         # print(nsb.to_docstring(res))
-        print(gsb.to_docstring(res))
+        # print(gsb.to_docstring(res))
 
 if __name__ == "__main__":
     main()
