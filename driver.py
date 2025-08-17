@@ -7,6 +7,7 @@ from docterella.connections.anthropic_connection import AnthropicConnection
 
 from docterella.runner import Runner
 from docterella.converters.numpy import NumpyStyleBuilder
+from docterella.converters.google import GoogleStyleBuilder
 
 def main():
     filename = sys.argv[1]
@@ -22,10 +23,12 @@ def main():
     results = runner.validate_sequence()
 
     nsb = NumpyStyleBuilder()
+    gsb = GoogleStyleBuilder()
 
     for res in results:
         print(res)
-        print(nsb.to_docstring(res))
+        # print(nsb.to_docstring(res))
+        print(gsb.to_docstring(res))
 
 if __name__ == "__main__":
     main()
