@@ -19,7 +19,6 @@ class OpenaiConnection(BaseConnection):
             instructions=instructions,
             input=prompt, 
             text_format=output_structure,
-            **self.options,
         )
 
         return message.output_parsed.model_dump_json()

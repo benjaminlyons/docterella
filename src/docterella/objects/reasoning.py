@@ -7,7 +7,7 @@ class FunctionReasoning(BaseModel):
     missing_params_from_docstring: List[str]
     extra_params_in_docstring: List[str]
     incorrect_param_descriptions: List[str]
-    return_type_matchs: bool
+    return_type_matches: bool
 
 class ClassReasoning(BaseModel):
     signature_parameters: List[str]

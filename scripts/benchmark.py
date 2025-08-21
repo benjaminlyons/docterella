@@ -46,7 +46,7 @@ def main():
     This function sets up and runs the benchmarking process using a specified model.
     """
     models = [
-        "gpt-5-nano-2025-08-07",
+        # "gpt-5-nano-2025-08-07",
         "gpt-5-mini-2025-08-07",
         # "claude-sonnet-4-20250514",
         "claude-3-5-haiku-20241022",
