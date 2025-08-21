@@ -1,5 +1,6 @@
 import ollama
 
+from pydantic import BaseModel
 from docterella.connections.base_connection import BaseConnection
 from typing import Dict
 
@@ -14,12 +15,12 @@ class OllamaConnection(BaseConnection):
         self, 
         instructions,
         prompt: str, 
-        format: str,
+        output_structure: BaseModel,
     ):
         result = ollama.generate(
             model=self.model, 
             prompt=f"{instructions}<code>{prompt}</code>", 
-            format=format, 
+            format=output_structure.model_json_schema(), 
             options=self.options
         )
 

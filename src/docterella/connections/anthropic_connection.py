@@ -1,6 +1,7 @@
 import anthropic
 import os
 
+from pydantic import BaseModel
 from docterella.connections.base_connection import BaseConnection
 from typing import Dict
 
@@ -13,8 +14,9 @@ class AnthropicConnection(BaseConnection):
 
         self.client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-    def prompt(self, instructions, prompt: str, format: str):
+    def prompt(self, instructions, prompt: str, output_structure: BaseModel):
 
+        format = output_structure.model_json_schema()
         message = self.client.messages.create(
             model=self.model,
             max_tokens=1000,
