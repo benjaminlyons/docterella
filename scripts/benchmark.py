@@ -8,6 +8,7 @@ from typing import List
 from docterella.connections.base_connection import BaseConnection
 from docterella.connections.anthropic_connection import AnthropicConnection
 from docterella.connections.ollama_connection import OllamaConnection
+from docterella.connections.openai_connection import OpenaiConnection
 from docterella.validators.base_agent import ValidationAgent
 from docterella.parsers.file_parser import FileParser
 from docterella.objects.base_assessment import BaseClassDocstringAssessment
@@ -17,6 +18,8 @@ from docterella.objects.base_assessment import FunctionDocstring
 from docterella.objects.base_assessment import ReturnValue
 from docterella.objects.base_assessment import Argument
 from docterella.runner import Runner
+from docterella.validators.config import StreamlinedConfig
+from docterella.validators.config import ReasoningConfig
 
 @dataclass
 class DocstringArgumentsComparison:
@@ -36,26 +39,27 @@ class ReturnValueComparison:
     ret_data_type: int
     num_rets: bool
 
-def main():
+def main(): 
     """
     Main function to run the benchmarking process.
 
     This function sets up and runs the benchmarking process using a specified model.
     """
     models = [
+        "gpt-5-nano-2025-08-07",
+        "gpt-5-mini-2025-08-07",
         # "claude-sonnet-4-20250514",
-        # "claude-3-5-haiku-20241022",
-        # "llama3.1:8b-instruct-q8_0",
-        # "phi4-mini-reasoning:3.8b",
-        # "phi4-mini:latest",
-        # "deepseek-r1:8b",
-        # "granite3.3:8b",
-        # "phi3:14b-medium-128k-instruct-q4_K_M",
-        # "phi4:latest",
-        # "gemma3:4b-it-qat",
-        # "qwen3:latest",
-        # "mistral-nemo:12b",
-        "starcoder2:7b",
+        "claude-3-5-haiku-20241022",
+        "llama3.1:8b-instruct-q8_0",
+        "phi4-mini-reasoning:3.8b",
+        "phi4-mini:latest",
+        "deepseek-r1:8b",
+        "granite3.3:8b",
+        "phi3:14b-medium-128k-instruct-q4_K_M",
+        "phi4:latest",
+        "gemma3:4b-it-qat",
+        "qwen3:latest",
+        "mistral-nemo:12b",
     ]
 
     for model in models: 
@@ -85,6 +89,7 @@ def benchmark(model: str):
     metrics = []
     responses = []
     for case, input_path, response_path in paths:
+        print(f"\tRunning {case}...")
         metric, response = _benchmark_helper(connection, input_path, response_path)
         metric = metric.rename({col: f"{col}_{case}" for col in metric.index})
         metrics.append(metric)
@@ -106,6 +111,8 @@ def load_model(model):
     """
     if "claude" in model:
         return AnthropicConnection(model)
+    elif 'gpt' in model:
+        return OpenaiConnection(model)
     else:
         return OllamaConnection(model)
 
@@ -128,7 +135,9 @@ def _benchmark_helper(
     with open(response_file_path, 'r') as f:
         expected_response_dict = json.load(f)
     
-    validator = ValidationAgent(connection)
+    # validator = ValidationAgent(connection, StreamlinedConfig())
+    validator = ValidationAgent(connection, ReasoningConfig())
+    # validator = ValidationAgent(connection)
     parser = FileParser(input_file_path)
 
     runner = Runner(parser, validator)
@@ -175,6 +184,8 @@ def compare_assessments(assessment, expected_assessment):
 
     results_dict = {}
     for key in act_dict:
+        if key == "reasoning":
+            continue
         act_val = assessment.__dict__[key]
         exp_val = expected_assessment.__dict__[key]
 

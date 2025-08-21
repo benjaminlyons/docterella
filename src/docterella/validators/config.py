@@ -3,6 +3,9 @@ from docterella.prompts.prompt_config import COT_CLASS_PROMPT_CONFIG
 from docterella.prompts.prompt_config import CLASS_PROMPT_CONFIG
 from docterella.prompts.prompt_config import FUNCTION_PROMPT_CONFIG
 from docterella.prompts.prompt_config import COT_FUNCTION_PROMPT_CONFIG
+from docterella.prompts.prompt_config import STREAMLINED_FUNCTION_PROMPT_CONFIG
+from docterella.prompts.prompt_config import STREAMLINED_CLASS_PROMPT_CONFIG
+
 class AgentConfig:
     def __init__(self, func: PromptConfig, cls: PromptConfig):
         self.func = func
@@ -32,3 +35,7 @@ class BasicConfig(AgentConfig):
 class ReasoningConfig(AgentConfig):
     def __init__(self):
         super().__init__(COT_FUNCTION_PROMPT_CONFIG, COT_CLASS_PROMPT_CONFIG)
+
+class StreamlinedConfig(AgentConfig):
+    def __init__(self):
+        super().__init__(STREAMLINED_FUNCTION_PROMPT_CONFIG, STREAMLINED_CLASS_PROMPT_CONFIG)

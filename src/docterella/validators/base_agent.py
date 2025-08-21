@@ -26,7 +26,7 @@ class ValidationAgent:
         response = self.connection.prompt(
             instructions=self.function_prompt,
             prompt=function.source,
-            format=self.function_output.model_json_schema()
+            format=self.function_output
         )
 
         try:
@@ -49,7 +49,7 @@ class ValidationAgent:
         response = self.connection.prompt(
             instructions=self.class_prompt,
             prompt=prompt,
-            format=self.class_output.model_json_schema(),
+            format=self.class_output,
         )
 
         try:
