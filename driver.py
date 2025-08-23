@@ -8,6 +8,7 @@ from docterella.connections.anthropic_connection import AnthropicConnection
 from docterella.runner import Runner
 from docterella.converters.numpy import NumpyStyleBuilder
 from docterella.converters.google import GoogleStyleBuilder
+from docterella.validators.config import AgentConfigFactory
 
 def main():
     filename = sys.argv[1]
@@ -17,7 +18,7 @@ def main():
     # connection = OllamaConnection("phi4-mini:latest")
    # connection = OllamaConnection("phi4-mini-reasoning:3.8b")
 
-    validator = ValidationAgent(connection)
+    validator = ValidationAgent(connection, AgentConfigFactory.create('reasoning'))
     parser = FileParser(filename)
     
     runner = Runner(parser, validator)

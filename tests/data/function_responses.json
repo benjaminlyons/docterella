@@ -120,7 +120,7 @@
     "parameter_names_are_correct": true,
     "parameter_types_are_correct": true,
     "parameter_descriptions_are_correct": false,
-    "return_type_is_correct": false,
+    "return_type_is_correct": true,
     "corrected_function_docstring": {
       "correct_function_description": "Validate dataset size against a threshold.",
       "correct_function_arguments": [

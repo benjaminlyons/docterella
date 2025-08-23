@@ -48,15 +48,15 @@ class ReturnValueComparison:
     return value specifications, typically from LLM-generated and expected responses.
     """
     
-    def __init__(self, ret1: List[ReturnValue], ret2: List[ReturnValue]):
+    def __init__(self, act_ret: List[ReturnValue], exp_ret: List[ReturnValue]):
         """Initialize comparison between two sets of return values.
         
         Args:
             ret1: First set of return values to compare.
             ret2: Second set of return values to compare against.
         """
-        self.corrected_return_types_match = sum(r1.data_type == r2.data_type for r1, r2 in zip(ret1, ret2))
-        self.corrected_return_counts_match = len(ret1) == len(ret2)
+        self.corrected_return_types_match = sum(r1.data_type == r2.data_type for r1, r2 in zip(exp_ret, act_ret))
+        self.corrected_return_counts_match = len(act_ret) == len(exp_ret)
 
 class ArgumentComparison:
     """Compares argument specifications between actual and expected docstring assessments.
@@ -181,8 +181,9 @@ class DocstringComparison:
             self.corrected_descriptions_match /= self.args_count
 
         if self.rets_count:
-            self.corrected_return_counts_match /= self.rets_count
-            self.corrected_return_types_match /= self.rets_count
+            self.corrected_return_counts_match = self.rets_count
+            self.corrected_return_types_match = self.rets_count
+
 
         self.field_comparison.to_mean()
 
@@ -302,36 +303,40 @@ class AssessmentComparator:
 
         return metrics.to_mean()
 
-    def compare_class_docstring(self, cd1: ClassDocstring, cd2: ClassDocstring):
+    def compare_class_docstring(self, act_cd1: ClassDocstring, exp_cd2: ClassDocstring):
         """Compare class docstring assessments.
         
         Args:
-            cd1: First class docstring assessment.
-            cd2: Second class docstring assessment to compare against.
+            act_cd1: First class docstring assessment.
+            exp_cd2: Second class docstring assessment to compare against.
             
         Returns:
             DocstringComparison: Comparison metrics for the class docstrings.
         """
-        dac = self.compare_all_arguments(cd1.correct_class_arguments, cd2.correct_class_arguments)
+        dac = self.compare_all_arguments(act_cd1.correct_class_arguments, exp_cd2.correct_class_arguments)
         return dac
     
-    def compare_function_docstring(self, fd1: FunctionDocstring, fd2: FunctionDocstring):
+    def compare_function_docstring(self, act_fd1: FunctionDocstring, exp_fd2: FunctionDocstring):
         """Compare function docstring assessments.
         
         Args:
-            fd1: First function docstring assessment.
-            fd2: Second function docstring assessment to compare against.
+            act_fd1: First function docstring assessment.
+            exp_fd2: Second function docstring assessment to compare against.
             
         Returns:
             DocstringComparison: Comparison metrics for the function docstrings.
         """
-        dac = self.compare_all_arguments(fd1.correct_function_arguments, fd2.correct_function_arguments)
+        dac = self.compare_all_arguments(act_fd1.correct_function_arguments, exp_fd2.correct_function_arguments)
 
-        ret_comp = ReturnValueComparison(fd1.correct_function_return_values, fd2.correct_function_return_values)
+        ret_comp = ReturnValueComparison(act_fd1.correct_function_return_values, exp_fd2.correct_function_return_values)
+        
+        out = dac + ret_comp
 
-        return (dac + ret_comp)
+        out.rets_count = len(exp_fd2.correct_function_return_values)
 
-    def compare_all_arguments(self, args1: List[Argument], args2: List[Argument]):
+        return out
+
+    def compare_all_arguments(self, act_args1: List[Argument], exp_args2: List[Argument]):
         """Compare two lists of argument specifications.
         
         Args:
@@ -341,9 +346,9 @@ class AssessmentComparator:
         Returns:
             DocstringComparison: Aggregated comparison metrics for all arguments.
         """
-        docstring_comp = DocstringComparison(corrected_num_args_match=len(args1) == len(args2))
+        docstring_comp = DocstringComparison(corrected_num_args_match=len(act_args1) == len(exp_args2))
 
-        for a1, a2 in zip(args1, args2):
+        for a2, a1 in zip(exp_args2, act_args1):
             docstring_comp += ArgumentComparison(a1, a2)
 
         return docstring_comp
@@ -376,7 +381,7 @@ class MetricsCollector:
             os.makedirs(os.path.dirname(self.metrics_path), exist_ok=True)
             self.metrics = pd.DataFrame()
 
-    def record(self, model, style, response, response_comparison: pd.DataFrame):
+    def record(self, model, style, suite, response, response_comparison: pd.DataFrame):
         """Record benchmark results for a specific model and style configuration.
         
         Args:
@@ -396,28 +401,31 @@ class MetricsCollector:
         self.metrics = pd.concat([self.metrics, response_comparison])
 
         self.save_metrics()
-        self.save_response(model, style, response)
+        self.save_response(model, style, suite, response)
 
     def save_metrics(self):
         """Save current metrics DataFrame to CSV file."""
         self.metrics.to_csv(self.metrics_path, index=True)
 
-    def save_response(self, model: str, style: str, response: str):
+    def save_response(self, model: str, style: str, suite, response: str):
         """Save raw model responses to JSON files organized by model and style.
         
         Args:
             model: Name/identifier of the model.
             style: Configuration style used.
+            suite: Test suites associated with the response.
             response: Raw response data to save.
         """
 
         path_safe_model_name = self.get_path_safe_model_name(model)
-        save_path = os.path.join(self.basepath, style, f'{path_safe_model_name}_response.json')
+        save_path = os.path.join(self.basepath, style, f'{path_safe_model_name}_{suite}_response.json')
         
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
         with open(save_path, 'w') as f:
-            json.dump(response, f, indent=4, default=str)
+            print("[", file=f)
+            print(',\n'.join(r.to_json() for r in response), file=f)
+            print("]", file=f)
 
     def save_summary_metrics(self):
         """Generate and save summary statistics grouped by model and style.
@@ -485,7 +493,7 @@ def main():
 
     mc = MetricsCollector()
     for model, style in itertools.product(models, styles): 
-        print(f"Running benchmarks for {model}")
+        print(f"Running benchmarks for {model} ({style})")
         benchmark(model, style, mc)
 
     mc.save_summary_metrics()
@@ -517,7 +525,7 @@ def benchmark(model: str, style: str, mc: MetricsCollector):
     for case in cases:
         print(f"\tRunning {case.label}...")
         metric, response = _benchmark_helper(connection, case, style)
-        mc.record(model, style, response, metric)
+        mc.record(model, style, case.label, response, metric)
 
 def load_model(model):
     """
