@@ -1,6 +1,17 @@
+"""Benchmarking script for evaluating docstring validation model performance.
+
+This script provides comprehensive benchmarking functionality for testing different
+LLM models on docstring validation tasks. It compares model-generated assessments
+against expected responses and generates detailed metrics for performance evaluation.
+
+The benchmarking system supports multiple model providers (Anthropic, OpenAI, Ollama)
+and different validation configurations (basic, reasoning, streamlined).
+"""
+
 import pandas as pd
 import dataclasses
 import json
+import itertools
 
 from dataclasses import dataclass
 from typing import List
@@ -20,24 +31,429 @@ from docterella.objects.base_assessment import Argument
 from docterella.runner import Runner
 from docterella.validators.config import StreamlinedConfig
 from docterella.validators.config import ReasoningConfig
+from docterella.validators.config import AgentConfig
+from docterella.validators.config import AgentConfigFactory
 
-@dataclass
-class DocstringArgumentsComparison:
-    arg_name: int = 0
-    arg_data_type: int = 0
-    arg_description: int = 0
-    num_args: int = 0
+from pydantic import BaseModel
 
-@dataclass
-class ArgumentComparison:
-    name: int
-    data_type: int
-    description: int
+from collections import defaultdict
 
-@dataclass
+from typing import Dict
+import os
+
 class ReturnValueComparison:
-    ret_data_type: int
-    num_rets: bool
+    """Compares return value specifications between actual and expected docstring assessments.
+    
+    This class evaluates whether the return types and counts match between two sets of
+    return value specifications, typically from LLM-generated and expected responses.
+    """
+    
+    def __init__(self, ret1: List[ReturnValue], ret2: List[ReturnValue]):
+        """Initialize comparison between two sets of return values.
+        
+        Args:
+            ret1: First set of return values to compare.
+            ret2: Second set of return values to compare against.
+        """
+        self.corrected_return_types_match = sum(r1.data_type == r2.data_type for r1, r2 in zip(ret1, ret2))
+        self.corrected_return_counts_match = len(ret1) == len(ret2)
+
+class ArgumentComparison:
+    """Compares argument specifications between actual and expected docstring assessments.
+    
+    This class evaluates whether argument names, types, and descriptions match between
+    two argument specifications, typically from LLM-generated and expected responses.
+    """
+    
+    def __init__(self, arg1: Argument, arg2: Argument):
+        """Initialize comparison between two argument specifications.
+        
+        Args:
+            arg1: First argument to compare.
+            arg2: Second argument to compare against.
+        """
+        self.corrected_names_match = arg1.name == arg2.name
+        self.corrected_types_match = arg1.data_type == arg2.data_type
+        self.corrected_descriptions_match = arg1.description == arg2.description
+
+@dataclass
+class FieldComparison:
+    """Tracks field-level comparisons for aggregating benchmark metrics.
+    
+    This class maintains dictionaries to track comparison results and counts
+    across different fields, enabling calculation of mean accuracy scores.
+    """
+    
+    field_comp_dict: Dict = dataclasses.field(default_factory=lambda: defaultdict(int))
+    field_count_dict: Dict = dataclasses.field(default_factory=lambda: defaultdict(int))
+
+    def update(self, key, val1, val2):
+        """Update comparison results for a specific field.
+        
+        Args:
+            key: The field name being compared.
+            val1: First value to compare.
+            val2: Second value to compare against.
+        """
+        self.field_comp_dict[key] = int(val1 == val2)
+        self.field_count_dict[key] = 1
+
+    def __add__(self, other):
+        """Aggregate comparison results from another FieldComparison.
+        
+        Args:
+            other: Another FieldComparison instance to merge with this one.
+            
+        Returns:
+            FieldComparison: This instance with aggregated results.
+        """
+        fields = set(list(other.field_comp_dict.keys()) + list(self.field_comp_dict.keys()))
+
+        for field in fields:
+            self.field_comp_dict[field] += other.field_comp_dict[field]
+            self.field_count_dict[field] += other.field_count_dict[field]
+
+        return self
+
+    def to_mean(self):
+        """Convert aggregated comparison counts to mean accuracy scores in place"""
+        for field in self.field_comp_dict:
+            self.field_comp_dict[field] /= self.field_count_dict[field]
+        return self
+
+@dataclass
+class DocstringComparison:
+    """Comprehensive comparison metrics for docstring validation assessments.
+    
+    This class tracks multiple accuracy metrics across argument names, types,
+    descriptions, return values, and other docstring elements for benchmarking
+    LLM performance on docstring validation tasks.
+    """
+    
+    corrected_names_match: int = 0
+    corrected_types_match: int = 0
+    corrected_descriptions_match: int = 0
+    corrected_num_args_match: int = 0
+
+    args_count = 0
+
+    corrected_return_types_match: int = 0
+    corrected_return_counts_match: int = 0
+
+    rets_count = 0
+
+    field_comparison: FieldComparison = dataclasses.field(default_factory=FieldComparison)
+
+    def __add__(self, other):
+        """Aggregate metrics from argument or return value comparisons.
+        
+        Args:
+            other: An ArgumentComparison, ReturnValueComparison, or DocstringComparison
+                  instance to merge with this comparison.
+                  
+        Returns:
+            DocstringComparison: This instance with updated metrics.
+        """
+        if isinstance(other, ArgumentComparison) or isinstance(other, DocstringComparison):
+            self.corrected_names_match += int(other.corrected_names_match)
+            self.corrected_types_match += int(other.corrected_types_match)
+            self.corrected_descriptions_match += int(other.corrected_descriptions_match)
+            self.args_count += 1
+
+        if isinstance(other, ReturnValueComparison) or isinstance(other, DocstringComparison):
+            self.corrected_return_counts_match += int(other.corrected_return_counts_match)
+            self.corrected_return_types_match += int(other.corrected_return_types_match)
+            self.rets_count += 1
+
+        if isinstance(other, DocstringComparison):
+            self.field_comparison += other.field_comparison
+            self.corrected_num_args_match += int(other.corrected_num_args_match)
+            self.args_count += other.args_count - 1
+            self.rets_count += other.rets_count - 1
+
+        return self
+
+    def to_mean(self):
+        """Convert aggregated counts to mean accuracy scores in place."""
+        if self.args_count:
+            self.corrected_names_match /= self.args_count
+            self.corrected_types_match /= self.args_count
+            self.corrected_descriptions_match /= self.args_count
+
+        if self.rets_count:
+            self.corrected_return_counts_match /= self.rets_count
+            self.corrected_return_types_match /= self.rets_count
+
+        self.field_comparison.to_mean()
+
+        return self
+
+    def to_dict(self):
+        """Convert comparison metrics to dictionary format.
+        
+        Returns:
+            dict: Dictionary representation of all comparison metrics.
+        """
+
+        output_dict = dataclasses.asdict(self)
+        output_dict.update(**output_dict['field_comparison']["field_comp_dict"])
+
+        del output_dict["field_comparison"]
+
+        return output_dict
+
+class TestCaseSuite:
+    """Manages test cases for benchmarking docstring validation models.
+    
+    This class handles loading test input files and expected response data,
+    providing a standardized interface for running benchmark comparisons
+    against different validation models.
+    """
+    
+    def __init__(
+        self, 
+        label: str, 
+        input_path: str, 
+        response_path: str, 
+        ValidationClass: BaseModel,
+    ):
+        """Initialize a test case suite.
+        
+        Args:
+            label: Human-readable label for this test suite (e.g., 'function', 'class').
+            input_path: Path to the Python file containing test cases.
+            response_path: Path to JSON file with expected validation responses.
+            ValidationClass: Pydantic model class for validating responses.
+        """
+        self.label = label
+        self.input_path  = input_path
+        self.response_path = response_path
+        self.ValidationClass = ValidationClass
+
+        self._load_expected_response()
+
+    def _load_expected_response(self):
+        """Load expected responses from JSON file into memory."""
+        with open(self.response_path, 'r') as f:
+            self.expected_response_dict = json.load(f)
+
+    def get_expected_response(self, result):
+        """Retrieve expected response for a specific validation result.
+        
+        Args:
+            result: ValidationResults object containing metadata about the function/class.
+            
+        Returns:
+            BaseModel: Expected response validated against the ValidationClass.
+        """
+        expected = self.expected_response_dict[result.metadata.name]
+
+        expected["reasoning"] = {
+                "signature_parameters": [],
+                "docstring_parameters": [],
+                "missing_params_from_docstring": [],
+                "extra_params_in_docstring": [],
+                "incorrect_param_descriptions": [],
+        }
+        return self.ValidationClass.model_validate(expected)
+    
+class AssessmentComparator:
+    """Compares actual LLM assessment responses against expected benchmark responses.
+    
+    This class provides detailed comparison logic for different types of docstring
+    assessments, handling both function and class validation comparisons while
+    allowing specific fields to be ignored during comparison.
+    """
+    
+    def __init__(self, actual, expected, ignore_fields: List[str] = None):
+        """Initialize comparator with actual and expected assessments.
+        
+        Args:
+            actual: The LLM-generated assessment to evaluate.
+            expected: The benchmark expected assessment to compare against.
+            ignore_fields: List of field names to skip during comparison.
+                          Defaults to ['reasoning'] if not provided.
+        """
+        self.actual = actual
+        self.expected = expected
+
+        if ignore_fields is None:
+            ignore_fields = ["reasoning"]
+
+        self.ignore_fields = ignore_fields
+
+    def compare(self):
+        """Loop through each field in the actual response and expected, and compare"""
+        metrics = DocstringComparison()
+
+        for key in self.actual.model_dump():
+            if key in self.ignore_fields:
+                continue
+
+            act_val = self.actual.__dict__[key]
+            exp_val = self.expected.__dict__[key]
+
+            if isinstance(act_val, ClassDocstring):
+                metrics += self.compare_class_docstring(act_val, exp_val)
+            elif isinstance(act_val, FunctionDocstring):
+                metrics += self.compare_function_docstring(act_val, exp_val)
+            else:
+                metrics.field_comparison.update(key, act_val, exp_val)
+
+        return metrics.to_mean()
+
+    def compare_class_docstring(self, cd1: ClassDocstring, cd2: ClassDocstring):
+        """Compare class docstring assessments.
+        
+        Args:
+            cd1: First class docstring assessment.
+            cd2: Second class docstring assessment to compare against.
+            
+        Returns:
+            DocstringComparison: Comparison metrics for the class docstrings.
+        """
+        dac = self.compare_all_arguments(cd1.correct_class_arguments, cd2.correct_class_arguments)
+        return dac
+    
+    def compare_function_docstring(self, fd1: FunctionDocstring, fd2: FunctionDocstring):
+        """Compare function docstring assessments.
+        
+        Args:
+            fd1: First function docstring assessment.
+            fd2: Second function docstring assessment to compare against.
+            
+        Returns:
+            DocstringComparison: Comparison metrics for the function docstrings.
+        """
+        dac = self.compare_all_arguments(fd1.correct_function_arguments, fd2.correct_function_arguments)
+
+        ret_comp = ReturnValueComparison(fd1.correct_function_return_values, fd2.correct_function_return_values)
+
+        return (dac + ret_comp)
+
+    def compare_all_arguments(self, args1: List[Argument], args2: List[Argument]):
+        """Compare two lists of argument specifications.
+        
+        Args:
+            args1: First list of arguments to compare.
+            args2: Second list of arguments to compare against.
+            
+        Returns:
+            DocstringComparison: Aggregated comparison metrics for all arguments.
+        """
+        docstring_comp = DocstringComparison(corrected_num_args_match=len(args1) == len(args2))
+
+        for a1, a2 in zip(args1, args2):
+            docstring_comp += ArgumentComparison(a1, a2)
+
+        return docstring_comp
+    
+class MetricsCollector:
+    """Collects, stores, and manages benchmark metrics across multiple model runs.
+    
+    This class handles persistence of benchmark results to CSV files, manages
+    response storage, and provides functionality for generating summary statistics
+    across different models and configuration styles.
+    """
+    
+    def __init__(self, basepath = "tests/data/results/", metrics_filename='metrics.csv'):
+        """Initialize metrics collector with storage configuration.
+        
+        Args:
+            basepath: Base directory path for storing metrics and responses.
+                     Defaults to 'tests/data/results/'.
+            metrics_filename: Filename for the main metrics CSV file.
+                             Defaults to 'metrics.csv'.
+        """
+        self.basepath = basepath
+        self.metrics_filename = metrics_filename
+        self.metrics_path = os.path.join(basepath, metrics_filename)
+
+        if os.path.exists(self.metrics_path):
+            self.metrics = pd.read_csv(self.metrics_path, index_col=False)
+            self.metrics = self.metrics.set_index(['model', 'style', 'suite', 'name'])
+        else:
+            os.makedirs(os.path.dirname(self.metrics_path), exist_ok=True)
+            self.metrics = pd.DataFrame()
+
+    def record(self, model, style, response, response_comparison: pd.DataFrame):
+        """Record benchmark results for a specific model and style configuration.
+        
+        Args:
+            model: Name/identifier of the model being benchmarked.
+            style: Configuration style used (e.g., 'basic', 'reasoning', 'streamlined').
+            response: Raw response data from the model.
+            response_comparison: DataFrame containing comparison metrics.
+        """
+        response_comparison['model'] = model
+        response_comparison['style'] = style
+        
+        response_comparison = response_comparison.set_index(['model', 'style', 'suite', 'name'])
+
+        if not self.metrics.empty:
+            self.metrics = self.metrics.drop(response_comparison.index, errors='ignore')
+
+        self.metrics = pd.concat([self.metrics, response_comparison])
+
+        self.save_metrics()
+        self.save_response(model, style, response)
+
+    def save_metrics(self):
+        """Save current metrics DataFrame to CSV file."""
+        self.metrics.to_csv(self.metrics_path, index=True)
+
+    def save_response(self, model: str, style: str, response: str):
+        """Save raw model responses to JSON files organized by model and style.
+        
+        Args:
+            model: Name/identifier of the model.
+            style: Configuration style used.
+            response: Raw response data to save.
+        """
+
+        path_safe_model_name = self.get_path_safe_model_name(model)
+        save_path = os.path.join(self.basepath, style, f'{path_safe_model_name}_response.json')
+        
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        with open(save_path, 'w') as f:
+            json.dump(response, f, indent=4, default=str)
+
+    def save_summary_metrics(self):
+        """Generate and save summary statistics grouped by model and style.
+        
+        Creates a summary CSV file with mean performance metrics across all
+        test cases for each model-style combination.
+        """
+        filepath = os.path.join(self.basepath, f"summary_{self.metrics_filename}")
+
+        result = (
+            self
+            .metrics
+            .reset_index()
+            .groupby(['model', 'style', 'suite'])
+            .mean(numeric_only=True)
+            .reset_index()
+        )
+
+        result.to_csv(filepath, index=False)
+
+    def get_path_safe_model_name(self, model: str):
+        """
+        Converts a model name to a path format.
+
+        Args:
+            model (str): The model name.
+
+        Returns:
+            str: The converted path.
+        """
+        punctuation = [":", "-", "."]
+
+        translation = str.maketrans({p: "_" for p in punctuation})
+
+        return model.translate(translation)
+        
 
 def main(): 
     """
@@ -47,57 +463,61 @@ def main():
     """
     models = [
         # "gpt-5-nano-2025-08-07",
-        "gpt-5-mini-2025-08-07",
+        # "gpt-5-mini-2025-08-07",
         # "claude-sonnet-4-20250514",
-        "claude-3-5-haiku-20241022",
+        #"claude-3-5-haiku-20241022",
         "llama3.1:8b-instruct-q8_0",
-        "phi4-mini-reasoning:3.8b",
-        "phi4-mini:latest",
-        "deepseek-r1:8b",
-        "granite3.3:8b",
-        "phi3:14b-medium-128k-instruct-q4_K_M",
-        "phi4:latest",
-        "gemma3:4b-it-qat",
-        "qwen3:latest",
-        "mistral-nemo:12b",
+        # "phi4-mini-reasoning:3.8b",
+        # "phi4-mini:latest",
+        # "deepseek-r1:8b",
+        # "granite3.3:8b",
+        # "phi3:14b-medium-128k-instruct-q4_K_M",
+        # "phi4:latest",
+        # "gemma3:4b-it-qat",
+        # "qwen3:latest",
+        # "mistral-nemo:12b",
+    ]
+    styles = [
+        'basic',
+        # 'streamlined',
+        'reasoning',
     ]
 
-    for model in models: 
+    mc = MetricsCollector()
+    for model, style in itertools.product(models, styles): 
         print(f"Running benchmarks for {model}")
-        benchmark(model)
+        benchmark(model, style, mc)
 
-def benchmark(model: str):
-    """
-    Benchmarks a model by comparing its output to expected responses.
+    mc.save_summary_metrics()
+
+def benchmark(model: str, style: str, mc: MetricsCollector):
+    """Benchmarks a model by comparing its output to expected responses.
 
     Args:
-        model (str): The name of the model to benchmark.
+        model: The name of the model to benchmark.
+        style: Configuration style to use ('basic', 'reasoning', 'streamlined').
+        mc: MetricsCollector instance for storing benchmark results.
     """
-    functions_path = "tests/data/functions.py"
-    functions_response_path = "tests/data/function_responses.json"
-
-    class_path = "tests/data/class.py"
-    class_response_path = "tests/data/class_responses.json"
-
-    paths = [
-        ("function", functions_path, functions_response_path),
-        ("class", class_path, class_response_path),
+    cases = [
+        TestCaseSuite(
+            "function", 
+            "tests/data/functions.py", 
+            "tests/data/function_responses.json",
+            BaseFunctionDocstringAssessment
+        ),
+        TestCaseSuite(
+            "class", 
+            "tests/data/class.py", 
+            "tests/data/class_responses.json",
+            BaseClassDocstringAssessment
+        ),
     ]
-
     connection = load_model(model)
 
-    metrics = []
-    responses = []
-    for case, input_path, response_path in paths:
-        print(f"\tRunning {case}...")
-        metric, response = _benchmark_helper(connection, input_path, response_path)
-        metric = metric.rename({col: f"{col}_{case}" for col in metric.index})
-        metrics.append(metric)
-        responses.extend(response)
-
-    metrics_series = pd.concat(metrics)
-
-    save_model_response(model, responses, metrics_series)
+    for case in cases:
+        print(f"\tRunning {case.label}...")
+        metric, response = _benchmark_helper(connection, case, style)
+        mc.record(model, style, response, metric)
 
 def load_model(model):
     """
@@ -118,184 +538,41 @@ def load_model(model):
 
 def _benchmark_helper(
     connection: BaseConnection, 
-    input_file_path: str, 
-    response_file_path: str
+    case: TestCaseSuite,
+    style: str
 ):
-    """
-    Runs benchmark a model given an input file and an expected output file
+    """Run benchmark for a model against a specific test case suite.
 
     Args:
-        connection (BaseConnection): The model connection to use.
-        input_file_path (str): The path to the input file containing metadata nodes.
-        response_file_path (str): The path to the expected responses file.
+        connection: The model connection to use for validation.
+        case: TestCaseSuite containing input files and expected responses.
+        style: Configuration style to use ('basic', 'reasoning', 'streamlined').
 
     Returns:
-        pd.Series, str: The metrics series and the generated responses.
+        tuple[pd.DataFrame, list]: Metrics DataFrame and list of validation responses.
     """
-    with open(response_file_path, 'r') as f:
-        expected_response_dict = json.load(f)
-    
-    # validator = ValidationAgent(connection, StreamlinedConfig())
-    validator = ValidationAgent(connection, ReasoningConfig())
-    # validator = ValidationAgent(connection)
-    parser = FileParser(input_file_path)
+    validator = ValidationAgent(connection, AgentConfigFactory.create(style))
+    parser = FileParser(case.input_path)
 
     runner = Runner(parser, validator)
 
     metrics = []
     responses = []
     for result in runner.validate_sequence():
-        expected = expected_response_dict[result.metadata.name]
-
-        if isinstance(result.assessment, BaseClassDocstringAssessment):
-            expected["reasoning"] = {
-                    "signature_parameters": [],
-                    "docstring_parameters": [],
-                    "missing_params_from_docstring": [],
-                    "extra_params_in_docstring": [],
-                    "incorrect_param_descriptions": [],
-            }
-            expected_assessment = BaseClassDocstringAssessment.model_validate(expected)
-        else:
-            expected["reasoning"] = {
-                    "signature_parameters": [],
-                    "docstring_parameters": [],
-                    "missing_params_from_docstring": [],
-                    "extra_params_in_docstring": [],
-                    "incorrect_param_descriptions": [],
-                    "return_type_matchs": True
-            }
-            expected_assessment = BaseFunctionDocstringAssessment.model_validate(expected)
-
         assessment = result.assessment
+        expected = case.get_expected_response(result)
 
-        check = compare_assessments(assessment, expected_assessment)
-        check["name"] = result.metadata.name
+        comp_result = AssessmentComparator(assessment, expected).compare().to_dict()
+        comp_result["name"] = result.metadata.name
 
-        metrics.append(check)
-        responses.append(str(result))
+        metrics.append(comp_result)
+        responses.append(result)
 
-    metrics_series = pd.DataFrame(metrics).mean(numeric_only=True)
+    metrics = pd.DataFrame(metrics)
+    metrics['suite'] = case.label
 
-    return metrics_series, responses
-
-def compare_assessments(assessment, expected_assessment):
-    act_dict = assessment.model_dump()
-
-    results_dict = {}
-    for key in act_dict:
-        if key == "reasoning":
-            continue
-        act_val = assessment.__dict__[key]
-        exp_val = expected_assessment.__dict__[key]
-
-        if isinstance(act_val, ClassDocstring):
-            results_dict.update(compare_class_docstring(act_val, exp_val))
-        elif isinstance(act_val, FunctionDocstring):
-            results_dict.update(compare_function_docstring(act_val, exp_val))
-        else:
-            results_dict[key] = act_val == exp_val
-
-    return results_dict
-
-def compare_class_docstring(cd1: ClassDocstring, cd2: ClassDocstring):
-    return dataclasses.asdict(
-        compare_all_arguments(
-            cd1.correct_class_arguments, 
-            cd2.correct_class_arguments,
-        )
-    )
+    return metrics, responses
 
 
-def compare_all_arguments(args1: List[Argument], args2: List[Argument]):
-    arg_comp = DocstringArgumentsComparison(
-        arg_name=0,
-        arg_data_type=0,
-        arg_description=0,
-        num_args=len(args1) == len(args2)
-    )
-
-    total = 0
-    for a1, a2 in zip(args1, args2):
-        comp = compare_argument(a1, a2)
-
-        arg_comp.arg_name += comp.name
-        arg_comp.arg_data_type += comp.data_type
-        arg_comp.arg_description += comp.description
-
-        total += 1
-
-    if total != 0:
-        arg_comp.arg_name /= total
-        arg_comp.arg_data_type /= total
-        arg_comp.arg_description /= total
-
-    return arg_comp
-
-
-def compare_argument(arg1: Argument, arg2: Argument) -> ArgumentComparison:
-    return ArgumentComparison(
-        name=arg1.name == arg2.name,
-        data_type=arg1.data_type == arg2.data_type,
-        description=arg1.description == arg2.description,
-    )
-
-def compare_function_docstring(fd1: FunctionDocstring, fd2: FunctionDocstring):
-    return {
-        **dataclasses.asdict(compare_all_arguments(
-            fd1.correct_function_arguments, 
-            fd2.correct_function_arguments,
-        )),
-        **dataclasses.asdict(compare_return_values(
-            fd1.correct_function_return_values, 
-            fd2.correct_function_return_values
-        ))
-    }
-
-
-def compare_return_values(ret1: List[ReturnValue], ret2: List[ReturnValue]):
-    return ReturnValueComparison(
-        ret_data_type=sum(r1.data_type == r2.data_type for r1, r2 in zip(ret1, ret2)), 
-        num_rets=len(ret1) == len(ret2)
-    )
-
-def save_model_response(model: str, response: str, metrics: pd.Series, base_path = "tests/data/results/"):
-    """
-    Saves the model response and metrics to files.
-
-    Args:
-        model (str): The name of the model.
-        response (str): The generated responses.
-        metrics (pd.Series): The metrics series.
-        base_path (str): The base path for saving the files.
-    """
-    model_path = base_path + model_to_path(model)
-
-    response_path = f"{model_path}_response.json"
-    metric_path = f"{model_path}_metric.json"
-
-    with open(response_path, 'w') as f:
-        for o in response:
-            print(o, file=f)
-
-    with open(metric_path, 'w') as f:
-        json.dump(metrics.to_dict(), f, indent=4)
-
-def model_to_path(model: str):
-    """
-    Converts a model name to a path format.
-
-    Args:
-        model (str): The model name.
-
-    Returns:
-        str: The converted path.
-    """
-    punctuation = [":", "-", "."]
-
-    translation = str.maketrans({p: "_" for p in punctuation})
-
-    return model.translate(translation)
-        
 if __name__ == "__main__":
     main()

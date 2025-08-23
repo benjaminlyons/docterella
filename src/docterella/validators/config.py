@@ -39,3 +39,15 @@ class ReasoningConfig(AgentConfig):
 class StreamlinedConfig(AgentConfig):
     def __init__(self):
         super().__init__(STREAMLINED_FUNCTION_PROMPT_CONFIG, STREAMLINED_CLASS_PROMPT_CONFIG)
+
+class AgentConfigFactory:
+    @staticmethod
+    def create(style: str = None) -> AgentConfig:
+        if style == "basic" or style is None:
+            return BasicConfig()
+        elif style == "reasoning":
+            return ReasoningConfig()
+        elif style == "streamlined":
+            return StreamlinedConfig()
+        else:
+            raise ValueError(f"Unknown agent configuration style: {style}")
