@@ -10,7 +10,7 @@ class OllamaConnection(BaseConnection):
         self.model = model
         
         if options is None:
-            self.options = {"temperature": 0, "top_p": 0.1}
+            self.options = {"temperature": 0}
 
     def prompt(
         self, 
