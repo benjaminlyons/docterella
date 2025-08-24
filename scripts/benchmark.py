@@ -51,9 +51,12 @@ class ReturnValueComparison:
     def __init__(self, act_ret: List[ReturnValue], exp_ret: List[ReturnValue]):
         """Initialize comparison between two sets of return values.
         
-        Args:
-            ret1: First set of return values to compare.
-            ret2: Second set of return values to compare against.
+        Parameters
+        ----------
+        act_ret : List[ReturnValue]
+            Actual return values to compare.
+        exp_ret : List[ReturnValue]
+            Expected return values to compare against.
         """
         self.corrected_return_types_match = sum(r1.data_type == r2.data_type for r1, r2 in zip(exp_ret, act_ret))
         self.corrected_return_counts_match = len(act_ret) == len(exp_ret)
@@ -68,9 +71,12 @@ class ArgumentComparison:
     def __init__(self, arg1: Argument, arg2: Argument):
         """Initialize comparison between two argument specifications.
         
-        Args:
-            arg1: First argument to compare.
-            arg2: Second argument to compare against.
+        Parameters
+        ----------
+        arg1 : Argument
+            First argument to compare.
+        arg2 : Argument
+            Second argument to compare against.
         """
         self.corrected_names_match = arg1.name == arg2.name
         self.corrected_types_match = arg1.data_type == arg2.data_type
@@ -90,10 +96,14 @@ class FieldComparison:
     def update(self, key, val1, val2):
         """Update comparison results for a specific field.
         
-        Args:
-            key: The field name being compared.
-            val1: First value to compare.
-            val2: Second value to compare against.
+        Parameters
+        ----------
+        key : str
+            The field name being compared.
+        val1 : Any
+            First value to compare.
+        val2 : Any
+            Second value to compare against.
         """
         self.field_comp_dict[key] = int(val1 == val2)
         self.field_count_dict[key] = 1
@@ -101,11 +111,15 @@ class FieldComparison:
     def __add__(self, other):
         """Aggregate comparison results from another FieldComparison.
         
-        Args:
-            other: Another FieldComparison instance to merge with this one.
+        Parameters
+        ----------
+        other : FieldComparison
+            Another FieldComparison instance to merge with this one.
             
-        Returns:
-            FieldComparison: This instance with aggregated results.
+        Returns
+        -------
+        FieldComparison
+            This instance with aggregated results.
         """
         fields = set(list(other.field_comp_dict.keys()) + list(self.field_comp_dict.keys()))
 
@@ -147,12 +161,15 @@ class DocstringComparison:
     def __add__(self, other):
         """Aggregate metrics from argument or return value comparisons.
         
-        Args:
-            other: An ArgumentComparison, ReturnValueComparison, or DocstringComparison
-                  instance to merge with this comparison.
+        Parameters
+        ----------
+        other : ArgumentComparison, ReturnValueComparison, or DocstringComparison
+            An instance to merge with this comparison.
                   
-        Returns:
-            DocstringComparison: This instance with updated metrics.
+        Returns
+        -------
+        DocstringComparison
+            This instance with updated metrics.
         """
         if isinstance(other, ArgumentComparison) or isinstance(other, DocstringComparison):
             self.corrected_names_match += int(other.corrected_names_match)
@@ -192,8 +209,10 @@ class DocstringComparison:
     def to_dict(self):
         """Convert comparison metrics to dictionary format.
         
-        Returns:
-            dict: Dictionary representation of all comparison metrics.
+        Returns
+        -------
+        dict
+            Dictionary representation of all comparison metrics.
         """
 
         output_dict = dataclasses.asdict(self)
@@ -220,11 +239,16 @@ class TestCaseSuite:
     ):
         """Initialize a test case suite.
         
-        Args:
-            label: Human-readable label for this test suite (e.g., 'function', 'class').
-            input_path: Path to the Python file containing test cases.
-            response_path: Path to JSON file with expected validation responses.
-            ValidationClass: Pydantic model class for validating responses.
+        Parameters
+        ----------
+        label : str
+            Human-readable label for this test suite (e.g., 'function', 'class').
+        input_path : str
+            Path to the Python file containing test cases.
+        response_path : str
+            Path to JSON file with expected validation responses.
+        ValidationClass : BaseModel
+            Pydantic model class for validating responses.
         """
         self.label = label
         self.input_path  = input_path
@@ -241,11 +265,15 @@ class TestCaseSuite:
     def get_expected_response(self, result):
         """Retrieve expected response for a specific validation result.
         
-        Args:
-            result: ValidationResults object containing metadata about the function/class.
+        Parameters
+        ----------
+        result : ValidationResults
+            ValidationResults object containing metadata about the function/class.
             
-        Returns:
-            BaseModel: Expected response validated against the ValidationClass.
+        Returns
+        -------
+        BaseModel
+            Expected response validated against the ValidationClass.
         """
         expected = self.expected_response_dict[result.metadata.name]
 
@@ -269,11 +297,15 @@ class AssessmentComparator:
     def __init__(self, actual, expected, ignore_fields: List[str] = None):
         """Initialize comparator with actual and expected assessments.
         
-        Args:
-            actual: The LLM-generated assessment to evaluate.
-            expected: The benchmark expected assessment to compare against.
-            ignore_fields: List of field names to skip during comparison.
-                          Defaults to ['reasoning'] if not provided.
+        Parameters
+        ----------
+        actual : BaseAssessment
+            The LLM-generated assessment to evaluate.
+        expected : BaseAssessment
+            The benchmark expected assessment to compare against.
+        ignore_fields : List[str], optional
+            List of field names to skip during comparison.
+            Defaults to ['reasoning'] if not provided.
         """
         self.actual = actual
         self.expected = expected
@@ -306,12 +338,17 @@ class AssessmentComparator:
     def compare_class_docstring(self, act_cd1: ClassDocstring, exp_cd2: ClassDocstring):
         """Compare class docstring assessments.
         
-        Args:
-            act_cd1: First class docstring assessment.
-            exp_cd2: Second class docstring assessment to compare against.
+        Parameters
+        ----------
+        act_cd1 : ClassDocstring
+            First class docstring assessment.
+        exp_cd2 : ClassDocstring
+            Second class docstring assessment to compare against.
             
-        Returns:
-            DocstringComparison: Comparison metrics for the class docstrings.
+        Returns
+        -------
+        DocstringComparison
+            Comparison metrics for the class docstrings.
         """
         dac = self.compare_all_arguments(act_cd1.correct_class_arguments, exp_cd2.correct_class_arguments)
         return dac
@@ -319,12 +356,17 @@ class AssessmentComparator:
     def compare_function_docstring(self, act_fd1: FunctionDocstring, exp_fd2: FunctionDocstring):
         """Compare function docstring assessments.
         
-        Args:
-            act_fd1: First function docstring assessment.
-            exp_fd2: Second function docstring assessment to compare against.
+        Parameters
+        ----------
+        act_fd1 : FunctionDocstring
+            First function docstring assessment.
+        exp_fd2 : FunctionDocstring
+            Second function docstring assessment to compare against.
             
-        Returns:
-            DocstringComparison: Comparison metrics for the function docstrings.
+        Returns
+        -------
+        DocstringComparison
+            Comparison metrics for the function docstrings.
         """
         dac = self.compare_all_arguments(act_fd1.correct_function_arguments, exp_fd2.correct_function_arguments)
 
@@ -339,12 +381,17 @@ class AssessmentComparator:
     def compare_all_arguments(self, act_args1: List[Argument], exp_args2: List[Argument]):
         """Compare two lists of argument specifications.
         
-        Args:
-            args1: First list of arguments to compare.
-            args2: Second list of arguments to compare against.
+        Parameters
+        ----------
+        act_args1 : List[Argument]
+            First list of arguments to compare.
+        exp_args2 : List[Argument]
+            Second list of arguments to compare against.
             
-        Returns:
-            DocstringComparison: Aggregated comparison metrics for all arguments.
+        Returns
+        -------
+        DocstringComparison
+            Aggregated comparison metrics for all arguments.
         """
         docstring_comp = DocstringComparison(corrected_num_args_match=len(act_args1) == len(exp_args2))
 
@@ -364,11 +411,14 @@ class MetricsCollector:
     def __init__(self, basepath = "tests/data/results/", metrics_filename='metrics.csv'):
         """Initialize metrics collector with storage configuration.
         
-        Args:
-            basepath: Base directory path for storing metrics and responses.
-                     Defaults to 'tests/data/results/'.
-            metrics_filename: Filename for the main metrics CSV file.
-                             Defaults to 'metrics.csv'.
+        Parameters
+        ----------
+        basepath : str, optional
+            Base directory path for storing metrics and responses.
+            Defaults to 'tests/data/results/'.
+        metrics_filename : str, optional
+            Filename for the main metrics CSV file.
+            Defaults to 'metrics.csv'.
         """
         self.basepath = basepath
         self.metrics_filename = metrics_filename
@@ -384,11 +434,18 @@ class MetricsCollector:
     def record(self, model, style, suite, response, response_comparison: pd.DataFrame):
         """Record benchmark results for a specific model and style configuration.
         
-        Args:
-            model: Name/identifier of the model being benchmarked.
-            style: Configuration style used (e.g., 'basic', 'reasoning', 'streamlined').
-            response: Raw response data from the model.
-            response_comparison: DataFrame containing comparison metrics.
+        Parameters
+        ----------
+        model : str
+            Name/identifier of the model being benchmarked.
+        style : str
+            Configuration style used (e.g., 'basic', 'reasoning', 'streamlined').
+        suite : str
+            Test suite being evaluated.
+        response : list
+            Raw response data from the model.
+        response_comparison : pd.DataFrame
+            DataFrame containing comparison metrics.
         """
         response_comparison['model'] = model
         response_comparison['style'] = style
@@ -410,11 +467,16 @@ class MetricsCollector:
     def save_response(self, model: str, style: str, suite, response: str):
         """Save raw model responses to JSON files organized by model and style.
         
-        Args:
-            model: Name/identifier of the model.
-            style: Configuration style used.
-            suite: Test suites associated with the response.
-            response: Raw response data to save.
+        Parameters
+        ----------
+        model : str
+            Name/identifier of the model.
+        style : str
+            Configuration style used.
+        suite : str
+            Test suites associated with the response.
+        response : str
+            Raw response data to save.
         """
 
         path_safe_model_name = self.get_path_safe_model_name(model)
@@ -447,14 +509,17 @@ class MetricsCollector:
         result.to_csv(filepath, index=False)
 
     def get_path_safe_model_name(self, model: str):
-        """
-        Converts a model name to a path format.
+        """Converts a model name to a path format.
 
-        Args:
-            model (str): The model name.
+        Parameters
+        ----------
+        model : str
+            The model name.
 
-        Returns:
-            str: The converted path.
+        Returns
+        -------
+        str
+            The converted path.
         """
         punctuation = [":", "-", "."]
 
@@ -464,26 +529,25 @@ class MetricsCollector:
         
 
 def main(): 
-    """
-    Main function to run the benchmarking process.
+    """Main function to run the benchmarking process.
 
     This function sets up and runs the benchmarking process using a specified model.
     """
     models = [
-        # "gpt-5-nano-2025-08-07",
+        "gpt-5-nano-2025-08-07",
         # "gpt-5-mini-2025-08-07",
         # "claude-sonnet-4-20250514",
-        #"claude-3-5-haiku-20241022",
+        "claude-3-5-haiku-20241022",
         "llama3.1:8b-instruct-q8_0",
-        # "phi4-mini-reasoning:3.8b",
-        # "phi4-mini:latest",
-        # "deepseek-r1:8b",
-        # "granite3.3:8b",
-        # "phi3:14b-medium-128k-instruct-q4_K_M",
-        # "phi4:latest",
-        # "gemma3:4b-it-qat",
-        # "qwen3:latest",
-        # "mistral-nemo:12b",
+        "phi4-mini-reasoning:3.8b",
+        "phi4-mini:latest",
+        "deepseek-r1:8b",
+        "granite3.3:8b",
+        "phi3:14b-medium-128k-instruct-q4_K_M",
+        "phi4:latest",
+        "gemma3:4b-it-qat",
+        "qwen3:latest",
+        "mistral-nemo:12b",
     ]
     styles = [
         'basic',
@@ -501,10 +565,14 @@ def main():
 def benchmark(model: str, style: str, mc: MetricsCollector):
     """Benchmarks a model by comparing its output to expected responses.
 
-    Args:
-        model: The name of the model to benchmark.
-        style: Configuration style to use ('basic', 'reasoning', 'streamlined').
-        mc: MetricsCollector instance for storing benchmark results.
+    Parameters
+    ----------
+    model : str
+        The name of the model to benchmark.
+    style : str
+        Configuration style to use ('basic', 'reasoning', 'streamlined').
+    mc : MetricsCollector
+        MetricsCollector instance for storing benchmark results.
     """
     cases = [
         TestCaseSuite(
@@ -528,14 +596,17 @@ def benchmark(model: str, style: str, mc: MetricsCollector):
         mc.record(model, style, case.label, response, metric)
 
 def load_model(model):
-    """
-    Loads a model based on the provided name.
+    """Loads a model based on the provided name.
 
-    Args:
-        model (str): The name of the model to load.
+    Parameters
+    ----------
+    model : str
+        The name of the model to load.
 
-    Returns:
-        BaseConnection: The loaded model connection.
+    Returns
+    -------
+    BaseConnection
+        The loaded model connection.
     """
     if "claude" in model:
         return AnthropicConnection(model)
@@ -551,13 +622,19 @@ def _benchmark_helper(
 ):
     """Run benchmark for a model against a specific test case suite.
 
-    Args:
-        connection: The model connection to use for validation.
-        case: TestCaseSuite containing input files and expected responses.
-        style: Configuration style to use ('basic', 'reasoning', 'streamlined').
+    Parameters
+    ----------
+    connection : BaseConnection
+        The model connection to use for validation.
+    case : TestCaseSuite
+        TestCaseSuite containing input files and expected responses.
+    style : str
+        Configuration style to use ('basic', 'reasoning', 'streamlined').
 
-    Returns:
-        tuple[pd.DataFrame, list]: Metrics DataFrame and list of validation responses.
+    Returns
+    -------
+    tuple[pd.DataFrame, list]
+        Metrics DataFrame and list of validation responses.
     """
     validator = ValidationAgent(connection, AgentConfigFactory.create(style))
     parser = FileParser(case.input_path)
