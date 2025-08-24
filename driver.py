@@ -10,6 +10,8 @@ from docterella.docstrings.numpy import NumpyStyleBuilder
 from docterella.docstrings.google import GoogleStyleBuilder
 from docterella.agents.config import AgentConfigFactory
 
+from docterella.reports.json import JSONReport
+
 def main():
     filename = sys.argv[1]
 
@@ -18,7 +20,7 @@ def main():
     # connection = OllamaConnection("phi4-mini:latest")
    # connection = OllamaConnection("phi4-mini-reasoning:3.8b")
 
-    validator = ValidationAgent(connection, AgentConfigFactory.create('reasoning'))
+    validator = ValidationAgent(connection, AgentConfigFactory.create('basic'))
     parser = FileParser(filename)
     
     runner = Runner(parser, validator)
@@ -28,10 +30,12 @@ def main():
     nsb = NumpyStyleBuilder()
     gsb = GoogleStyleBuilder()
 
-    for res in results:
-        print(res)
-        # print(nsb.to_docstring(res))
-        # print(gsb.to_docstring(res))
+    report = JSONReport(results)
+
+    report.to_file("test_output.json")
+
+    # print(nsb.to_docstring(res))
+    # print(gsb.to_docstring(res))
 
 if __name__ == "__main__":
     main()

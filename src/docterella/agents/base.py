@@ -4,8 +4,8 @@ from abc import abstractmethod
 from docterella.connections.base_connection import BaseConnection
 
 from docterella.results import ValidationResults
-from docterella.parsers.function_parser import FunctionMetadata
-from docterella.parsers.class_parser import ClassMetadata
+from docterella.pydantic.metadata import FunctionMetadata
+from docterella.pydantic.metadata import ClassMetadata
 
 from docterella.agents.config import AgentConfig
 from docterella.agents.config import BasicConfig
@@ -25,7 +25,7 @@ class ValidationAgent:
     def validate_function(self, function: FunctionMetadata):
         response = self.connection.prompt(
             instructions=self.function_prompt,
-            prompt=function.source,
+            prompt=function.source_code,
             output_structure=self.function_output
         )
 
@@ -38,7 +38,7 @@ class ValidationAgent:
         return ValidationResults(function, da)
 
     def validate_class(self, cls: ClassMetadata):
-        source = cls.constructor.source
+        source = cls.constructor.source_code
         docstring = cls.docstring
 
         prompt = (
