@@ -20,19 +20,19 @@ from docterella.connections.base_connection import BaseConnection
 from docterella.connections.anthropic_connection import AnthropicConnection
 from docterella.connections.ollama_connection import OllamaConnection
 from docterella.connections.openai_connection import OpenaiConnection
-from docterella.validators.base_agent import ValidationAgent
+from docterella.agents.base import ValidationAgent
 from docterella.parsers.file_parser import FileParser
-from docterella.objects.base_assessment import BaseClassDocstringAssessment
-from docterella.objects.base_assessment import BaseFunctionDocstringAssessment
-from docterella.objects.base_assessment import ClassDocstring
-from docterella.objects.base_assessment import FunctionDocstring
-from docterella.objects.base_assessment import ReturnValue
-from docterella.objects.base_assessment import Argument
+from docterella.pydantic.assessments import ClassAssessment
+from docterella.pydantic.assessments import FunctionAssessment
+from docterella.pydantic.assessments import ClassDocstring
+from docterella.pydantic.assessments import FunctionDocstring
+from docterella.pydantic.assessments import ReturnValue
+from docterella.pydantic.assessments import Argument
 from docterella.runner import Runner
-from docterella.validators.config import StreamlinedConfig
-from docterella.validators.config import ReasoningConfig
-from docterella.validators.config import AgentConfig
-from docterella.validators.config import AgentConfigFactory
+from docterella.agents.config import StreamlinedConfig
+from docterella.agents.config import ReasoningConfig
+from docterella.agents.config import AgentConfig
+from docterella.agents.config import AgentConfigFactory
 
 from pydantic import BaseModel
 
@@ -579,13 +579,13 @@ def benchmark(model: str, style: str, mc: MetricsCollector):
             "function", 
             "tests/data/functions.py", 
             "tests/data/function_responses.json",
-            BaseFunctionDocstringAssessment
+            FunctionAssessment
         ),
         TestCaseSuite(
             "class", 
             "tests/data/class.py", 
             "tests/data/class_responses.json",
-            BaseClassDocstringAssessment
+            ClassAssessment
         ),
     ]
     connection = load_model(model)

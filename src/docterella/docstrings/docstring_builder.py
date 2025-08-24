@@ -1,15 +1,15 @@
 from abc import ABC
 from abc import abstractmethod
 
-from docterella.objects.base_assessment import FunctionDocstring
-from docterella.objects.base_assessment import ClassDocstring
+from docterella.pydantic.assessments import FunctionDocstring
+from docterella.pydantic.assessments import ClassDocstring
 
 from typing import List
-from docterella.objects.base_assessment import Argument
-from docterella.objects.base_assessment import ReturnValue
-from docterella.objects.results import ValidationResults
+from docterella.pydantic.assessments import Argument
+from docterella.pydantic.assessments import ReturnValue
+from docterella.results import ValidationResults
 
-from docterella.objects.metadata import MetaDataTypes
+from docterella.pydantic.metadata import MetaDataTypes
 
 class DocstringBuilder(ABC):
     """Base class for generating docstrings based on model outputs

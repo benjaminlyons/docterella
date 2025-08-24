@@ -3,12 +3,12 @@ from abc import abstractmethod
 
 from docterella.connections.base_connection import BaseConnection
 
-from docterella.objects.results import ValidationResults
+from docterella.results import ValidationResults
 from docterella.parsers.function_parser import FunctionMetadata
 from docterella.parsers.class_parser import ClassMetadata
 
-from docterella.validators.config import AgentConfig
-from docterella.validators.config import BasicConfig
+from docterella.agents.config import AgentConfig
+from docterella.agents.config import BasicConfig
 
 class ValidationAgent:
     def __init__(

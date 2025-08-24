@@ -15,9 +15,3 @@ class ClassReasoning(BaseModel):
     missing_params_from_docstring: List[str]
     extra_params_in_docstring: List[str]
     incorrect_param_descriptions: List[str]
-
-class BaseFunctionReasoningAssessment(BaseModel):
-    reasoning: FunctionReasoning
-
-class BaseClassReasoningAssessment(BaseModel):
-    reasoning: ClassReasoning

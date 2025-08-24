@@ -1,14 +1,14 @@
 import sys
 
-from docterella.validators.base_agent import ValidationAgent
+from docterella.agents.base import ValidationAgent
 from docterella.parsers.file_parser import FileParser
 from docterella.connections.ollama_connection import OllamaConnection
 from docterella.connections.anthropic_connection import AnthropicConnection
 
 from docterella.runner import Runner
-from docterella.converters.numpy import NumpyStyleBuilder
-from docterella.converters.google import GoogleStyleBuilder
-from docterella.validators.config import AgentConfigFactory
+from docterella.docstrings.numpy import NumpyStyleBuilder
+from docterella.docstrings.google import GoogleStyleBuilder
+from docterella.agents.config import AgentConfigFactory
 
 def main():
     filename = sys.argv[1]

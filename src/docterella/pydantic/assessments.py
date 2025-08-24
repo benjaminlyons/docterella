@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
-from docterella.objects.components import Argument
-from docterella.objects.components import ReturnValue
-from docterella.objects.components import FunctionDocstring
-from docterella.objects.components import ClassDocstring
+from docterella.pydantic.components import Argument
+from docterella.pydantic.components import ReturnValue
+from docterella.pydantic.components import FunctionDocstring
+from docterella.pydantic.components import ClassDocstring
 
-class BaseFunctionDocstringAssessment(BaseModel):
+class FunctionAssessment(BaseModel):
     summary_of_findings: str
 
     parameter_names_are_correct: bool
@@ -19,7 +19,7 @@ class BaseFunctionDocstringAssessment(BaseModel):
     def docstring(self):
         return self.corrected_function_docstring
     
-class BaseClassDocstringAssessment(BaseModel):
+class ClassAssessment(BaseModel):
     summary_of_findings: str
 
     parameter_names_are_correct: bool
