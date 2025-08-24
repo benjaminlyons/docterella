@@ -5,6 +5,7 @@ from docterella.connections.base_connection import BaseConnection
 from typing import Dict
 
 class OllamaConnection(BaseConnection):
+    """Interface for connecting to a model running via Ollama"""
     def __init__(self, model: str, options: Dict = None):
         self.model = model
         
@@ -13,10 +14,11 @@ class OllamaConnection(BaseConnection):
 
     def prompt(
         self, 
-        instructions,
+        instructions: str,
         prompt: str, 
         output_structure: BaseModel,
     ):
+
         result = ollama.generate(
             model=self.model, 
             prompt=f"{instructions}<code>{prompt}</code>", 

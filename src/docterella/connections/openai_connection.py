@@ -5,6 +5,7 @@ from typing import Dict
 from docterella.connections.base_connection import BaseConnection
 
 class OpenaiConnection(BaseConnection):
+    """Interface for connection to OpenAi models"""
     def __init__(self, model, options: Dict = None):
         self.model = model
 
@@ -13,7 +14,7 @@ class OpenaiConnection(BaseConnection):
 
         self.client = OpenAI()
 
-    def prompt(self, instructions, prompt: str, output_structure: BaseModel):
+    def prompt(self, instructions: str, prompt: str, output_structure: BaseModel):
         message = self.client.responses.parse(
             model=self.model,
             instructions=instructions,
