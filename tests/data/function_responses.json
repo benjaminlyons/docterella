@@ -1,327 +1,454 @@
-{
-  "calculate_area": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": true,
-    "corrected_function_docstring": {
-      "correct_function_description": "Calculate the area of a rectangle.",
-      "correct_function_arguments": [
-        {
-          "name": "length",
-          "data_type": "float",
-          "description": "Length of the rectangle in units."
+[
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "calculate_area",
+            "lineno": 10,
+            "end_lineno": 23,
+            "col_offset": 0,
+            "end_col_offset": 25,
+            "source_code": "def calculate_area(length: float, width: float) ->float:\n    \"\"\"Calculate the area of a rectangle.\n    \n    Args:\n        length: float\n            Length of the rectangle in units.\n        width: float\n            Width of the rectangle in units.\n            \n    Returns:\n        float\n            Area of the rectangle in square units.\n    \"\"\"\n    return length * width\n"
         },
-        {
-          "name": "width",
-          "data_type": "float",
-          "description": "Width of the rectangle in units."
+        "assessment": {
+            "summary_of_findings": "The docstring is well-structured and accurate. All parameters are correctly documented with proper types and clear descriptions. The return type and description are correct. No issues found.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": true,
+            "corrected_function_docstring": {
+                "correct_function_description": "Calculate the area of a rectangle.",
+                "correct_function_arguments": [
+                    {
+                        "name": "length",
+                        "data_type": "float",
+                        "description": "Length of the rectangle in units."
+                    },
+                    {
+                        "name": "width",
+                        "data_type": "float",
+                        "description": "Width of the rectangle in units."
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "float",
+                        "description": "Area of the rectangle in square units."
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "float",
-          "description": "Area of the rectangle in square units."
-        }
-      ]
     },
-    "summary_of_findings": "Perfect docstring with all parameters and return value correctly documented with accurate types and clear descriptions."
-  },
-  "create_user_profile": {
-    "parameter_names_are_correct": false,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": true,
-    "corrected_function_docstring": {
-      "correct_function_description": "Create a user profile string.",
-      "correct_function_arguments": [
-        {
-          "name": "name",
-          "data_type": "str",
-          "description": "Full name of the user."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "create_user_profile",
+            "lineno": 26,
+            "end_lineno": 39,
+            "col_offset": 0,
+            "end_col_offset": 54,
+            "source_code": "def create_user_profile(name: str, age: int, city: str) ->str:\n    \"\"\"Create a user profile string.\n    \n    Args:\n        name: str\n            Full name of the user.\n        age: int\n            Age of the user in years.\n            \n    Returns:\n        str\n            Formatted user profile string.\n    \"\"\"\n    return f'{name}, {age} years old, lives in {city}'\n"
         },
-        {
-          "name": "age",
-          "data_type": "int",
-          "description": "Age of the user in years."
+        "assessment": {
+            "summary_of_findings": "The function signature has 3 parameters (name, age, city) but the docstring is missing documentation for the 'city' parameter. All other aspects are correct - the documented parameters have accurate types and descriptions, and the return type is properly documented.",
+            "parameter_names_are_correct": false,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": true,
+            "corrected_function_docstring": {
+                "correct_function_description": "Create a user profile string",
+                "correct_function_arguments": [
+                    {
+                        "name": "name",
+                        "data_type": "str",
+                        "description": "Full name of the user"
+                    },
+                    {
+                        "name": "age",
+                        "data_type": "int",
+                        "description": "Age of the user in years"
+                    },
+                    {
+                        "name": "city",
+                        "data_type": "str",
+                        "description": "City where the user lives"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "str",
+                        "description": "Formatted user profile string"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "count_item_frequencies",
+            "lineno": 42,
+            "end_lineno": 58,
+            "col_offset": 0,
+            "end_col_offset": 17,
+            "source_code": "def count_item_frequencies(items: List[str], count: int) ->Dict[str, int]:\n    \"\"\"Count occurrences of items.\n    \n    Args:\n        items: str\n            Items to count.\n        count: str\n            Maximum count limit.\n            \n    Returns:\n        list\n            Dictionary of item counts.\n    \"\"\"\n    result = {}\n    for item in items[:count]:\n        result[item] = result.get(item, 0) + 1\n    return result\n"
         },
-        {
-          "name": "city",
-          "data_type": "str",
-          "description": "City where the user lives."
+        "assessment": {
+            "summary_of_findings": "The docstring has multiple issues: parameter types are incorrect (items should be List[str] not str, count should be int not str), and return type is wrong (should be Dict[str, int] not list). All parameter names are present but descriptions could be more specific.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": false,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Count occurrences of items up to a maximum limit",
+                "correct_function_arguments": [
+                    {
+                        "name": "items",
+                        "data_type": "List[str]",
+                        "description": "List of items to count frequencies for"
+                    },
+                    {
+                        "name": "count",
+                        "data_type": "int",
+                        "description": "Maximum number of items to process from the beginning of the list"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "Dict[str, int]",
+                        "description": "Dictionary mapping each item to its frequency count"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "str",
-          "description": "Formatted user profile string."
-        }
-      ]
     },
-    "summary_of_findings": "Missing 'city' parameter in docstring. All documented parameters have correct types and descriptions."
-  },
-  "count_item_frequencies": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": false,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": false,
-    "corrected_function_docstring": {
-      "correct_function_description": "Count occurrences of items up to a specified limit.",
-      "correct_function_arguments": [
-        {
-          "name": "items",
-          "data_type": "List[str]",
-          "description": "List of items to count."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "add_integers",
+            "lineno": 61,
+            "end_lineno": 78,
+            "col_offset": 0,
+            "end_col_offset": 16,
+            "source_code": "def add_integers(x: int, y: int) ->int:\n    \"\"\"Add two numbers together.\n    \n    Args:\n        x: int\n            First number to add.\n        y: int\n            Second number to add.\n        z: int\n            Third number to add.\n        multiplier: float\n            Factor to multiply the result.\n            \n    Returns:\n        int\n            Sum of the numbers.\n    \"\"\"\n    return x + y\n"
         },
-        {
-          "name": "count",
-          "data_type": "int",
-          "description": "Maximum number of items to process."
+        "assessment": {
+            "summary_of_findings": "The docstring contains significant errors: it documents parameters 'z' and 'multiplier' that don't exist in the function signature, while the actual parameters 'x' and 'y' are correctly documented. The function description and return documentation are accurate.",
+            "parameter_names_are_correct": false,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": true,
+            "corrected_function_docstring": {
+                "correct_function_description": "Add two integers together.",
+                "correct_function_arguments": [
+                    {
+                        "name": "x",
+                        "data_type": "int",
+                        "description": "First integer to add."
+                    },
+                    {
+                        "name": "y",
+                        "data_type": "int",
+                        "description": "Second integer to add."
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "int",
+                        "description": "Sum of the two integers."
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "Dict[str, int]",
-          "description": "Dictionary mapping items to their occurrence counts."
-        }
-      ]
     },
-    "summary_of_findings": "Parameter 'items' documented as 'str' but should be 'List[str]'. Parameter 'count' documented as 'str' but should be 'int'. Return type documented as 'list' but should be 'Dict[str, int]'."
-  },
-  "add_integers": {
-    "parameter_names_are_correct": false,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": true,
-    "corrected_function_docstring": {
-      "correct_function_description": "Add two integers together.",
-      "correct_function_arguments": [
-        {
-          "name": "x",
-          "data_type": "int",
-          "description": "First number to add."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "validate_dataset",
+            "lineno": 81,
+            "end_lineno": 96,
+            "col_offset": 0,
+            "end_col_offset": 32,
+            "source_code": "def validate_dataset(data: List[Dict[str, Union[str, int]]], threshold: float\n    ) ->bool:\n    \"\"\"Process data.\n    \n    Args:\n        data: List[Dict[str, Union[str, int]]]\n            Some data.\n        threshold: float\n            A number.\n            \n    Returns:\n        bool\n            True or False.\n    \"\"\"\n    if not data:\n        return False\n    return len(data) > threshold\n"
         },
-        {
-          "name": "y",
-          "data_type": "int",
-          "description": "Second number to add."
+        "assessment": {
+            "summary_of_findings": "The docstring has correct parameter names and types, but the function description and parameter descriptions are too vague. The function description says 'Process data' but the function actually validates if dataset size exceeds threshold. Parameter descriptions are unhelpful ('Some data', 'A number') and the return description is too generic.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": false,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Validate if dataset size exceeds the specified threshold",
+                "correct_function_arguments": [
+                    {
+                        "name": "data",
+                        "data_type": "List[Dict[str, Union[str, int]]]",
+                        "description": "List of dictionaries containing dataset records with string or integer values"
+                    },
+                    {
+                        "name": "threshold",
+                        "data_type": "float",
+                        "description": "Minimum number of records required for dataset to be considered valid"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "bool",
+                        "description": "True if dataset has more records than threshold, False if empty or threshold not met"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "int",
-          "description": "Sum of the two numbers."
-        }
-      ]
     },
-    "summary_of_findings": "Docstring includes parameters 'z' and 'multiplier' that don't exist in function signature. Only 'x' and 'y' parameters should be documented."
-  },
-  "validate_dataset": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": false,
-    "return_type_is_correct": true,
-    "corrected_function_docstring": {
-      "correct_function_description": "Validate dataset size against a threshold.",
-      "correct_function_arguments": [
-        {
-          "name": "data",
-          "data_type": "List[Dict[str, Union[str, int]]]",
-          "description": "List of data records to validate."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "load_config_file",
+            "lineno": 99,
+            "end_lineno": 109,
+            "col_offset": 0,
+            "end_col_offset": 27,
+            "source_code": "def load_config_file(file_path: str, encoding: str='utf-8') ->Dict[str, any]:\n    \"\"\"Load configuration from a JSON file.\n    \n    Args:\n        file_path: str\n            Path to the JSON configuration file.\n        encoding: str\n            File encoding to use when reading.\n    \"\"\"\n    with open(file_path, 'r', encoding=encoding) as f:\n        return json.load(f)\n"
         },
-        {
-          "name": "threshold",
-          "data_type": "float",
-          "description": "Minimum number of records required for valid dataset."
+        "assessment": {
+            "summary_of_findings": "The docstring is missing return documentation entirely, and has an incorrect type annotation (should be 'Any' not 'any'). All parameters are correctly documented with proper types and clear descriptions.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Load configuration from a JSON file",
+                "correct_function_arguments": [
+                    {
+                        "name": "file_path",
+                        "data_type": "str",
+                        "description": "Path to the JSON configuration file"
+                    },
+                    {
+                        "name": "encoding",
+                        "data_type": "str",
+                        "description": "File encoding to use when reading. Defaults to 'utf-8'"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "Dict[str, Any]",
+                        "description": "Dictionary containing the loaded configuration data"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "bool",
-          "description": "True if dataset has more records than threshold, False otherwise."
-        }
-      ]
     },
-    "summary_of_findings": "Parameter descriptions are too vague ('Some data', 'A number'). Return description is too vague ('True or False'). Need more specific and helpful descriptions."
-  },
-  "load_config_file": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": false,
-    "corrected_function_docstring": {
-      "correct_function_description": "Load configuration from a JSON file.",
-      "correct_function_arguments": [
-        {
-          "name": "file_path",
-          "data_type": "str",
-          "description": "Path to the JSON configuration file."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "calculate_mean",
+            "lineno": 112,
+            "end_lineno": 123,
+            "col_offset": 0,
+            "end_col_offset": 38,
+            "source_code": "def calculate_mean(numbers: List[int]) ->float:\n    \"\"\"Calculate the average of a list of numbers.\n    \n    Args:\n        numbers: List[int]\n            List of integers to average.\n            \n    Returns:\n        int\n            Average value of the numbers.\n    \"\"\"\n    return sum(numbers) / len(numbers)\n"
         },
-        {
-          "name": "encoding",
-          "data_type": "str",
-          "description": "File encoding to use when reading. Defaults to 'utf-8'."
+        "assessment": {
+            "summary_of_findings": "The function has correct parameter documentation but incorrect return type - it returns float but docstring says int",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Calculate the average of a list of numbers",
+                "correct_function_arguments": [
+                    {
+                        "name": "numbers",
+                        "data_type": "List[int]",
+                        "description": "List of integers to average"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "float",
+                        "description": "Average value of the numbers"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "Dict[str, any]",
-          "description": "Dictionary containing the loaded configuration data."
-        }
-      ]
     },
-    "summary_of_findings": "Missing return documentation entirely. Return type should be 'Dict[str, any]' with description of what is returned."
-  },
-  "calculate_mean": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": false,
-    "corrected_function_docstring": {
-      "correct_function_description": "Calculate the average of a list of numbers.",
-      "correct_function_arguments": [
-        {
-          "name": "numbers",
-          "data_type": "List[int]",
-          "description": "List of integers to average."
-        }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "float",
-          "description": "Average value of the numbers as a floating point number."
-        }
-      ]
-    },
-    "summary_of_findings": "Return type documented as 'int' but should be 'float' since division can produce floating point results."
-  },
-  "normalize_string": {
-    "parameter_names_are_correct": false,
-    "parameter_types_are_correct": false,
-    "parameter_descriptions_are_correct": false,
-    "return_type_is_correct": false,
-    "corrected_function_docstring": {
-      "correct_function_description": "Normalize string case based on sensitivity setting.",
-      "correct_function_arguments": [
-        {
-          "name": "value",
-          "data_type": "str",
-          "description": "String value to normalize."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "normalize_string",
+            "lineno": 126,
+            "end_lineno": 129,
+            "col_offset": 0,
+            "end_col_offset": 24,
+            "source_code": "def normalize_string(value: str, case_sensitive: bool=False):\n    if case_sensitive:\n        return value\n    return value.lower()\n"
         },
-        {
-          "name": "case_sensitive",
-          "data_type": "bool",
-          "description": "Whether to preserve original case. Defaults to False."
+        "assessment": {
+            "summary_of_findings": "The function has no docstring at all, so all validation checks fail. The function normalizes a string by optionally converting it to lowercase based on the case_sensitive parameter, and returns a string.",
+            "parameter_names_are_correct": false,
+            "parameter_types_are_correct": false,
+            "parameter_descriptions_are_correct": false,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Normalize a string by optionally converting it to lowercase",
+                "correct_function_arguments": [
+                    {
+                        "name": "value",
+                        "data_type": "str",
+                        "description": "The string to normalize"
+                    },
+                    {
+                        "name": "case_sensitive",
+                        "data_type": "bool",
+                        "description": "If True, returns the string unchanged. If False, converts to lowercase. Defaults to False"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "str",
+                        "description": "The normalized string, either unchanged or converted to lowercase"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "str",
-          "description": "Normalized string, either original case or lowercase."
-        }
-      ]
     },
-    "summary_of_findings": "No docstring provided. All parameters and return value need to be documented with types and descriptions."
-  },
-  "get_system_status": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": false,
-    "return_type_is_correct": false,
-    "corrected_function_docstring": {
-      "correct_function_description": "Get current system status information.",
-      "correct_function_arguments": [],
-      "correct_function_return_values": [
-        {
-          "data_type": "str",
-          "description": "System status message."
-        }
-      ]
-    },
-    "summary_of_findings": "Function description is unhelpful ('does something mysterious'). Missing return type documentation. No parameters to document."
-  },
-  "format_text_output": {
-    "parameter_names_are_correct": false,
-    "parameter_types_are_correct": false,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": false,
-    "corrected_function_docstring": {
-      "correct_function_description": "Format text string to specified length with padding.",
-      "correct_function_arguments": [
-        {
-          "name": "text",
-          "data_type": "str",
-          "description": "The text content to format."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "get_system_status",
+            "lineno": 132,
+            "end_lineno": 138,
+            "col_offset": 0,
+            "end_col_offset": 27,
+            "source_code": "def get_system_status():\n    \"\"\"This function does something mysterious.\n    \n    It performs operations but nobody knows what parameters it takes\n    or what it returns.\n    \"\"\"\n    return 'mystery solved'\n"
         },
-        {
-          "name": "max_length",
-          "data_type": "int",
-          "description": "Maximum length for the formatted text."
+        "assessment": {
+            "summary_of_findings": "The function has no parameters but the docstring is completely unhelpful and doesn't document the return value. The function actually returns a string 'mystery solved' but this is not documented.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Get the current system status",
+                "correct_function_arguments": [],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "str",
+                        "description": "A string indicating the system status"
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "format_text_output",
+            "lineno": 141,
+            "end_lineno": 156,
+            "col_offset": 0,
+            "end_col_offset": 43,
+            "source_code": "def format_text_output(text: str, max_length: int, pad_char: str=' ') ->str:\n    \"\"\"Format text string.\n    \n    Args:\n        content: str\n            The text content to format.\n        max_length: float\n            Maximum length allowed.\n        \n    Returns:\n        list\n            The formatted text.\n    \"\"\"\n    if len(text) > max_length:\n        return text[:max_length]\n    return text.ljust(max_length, pad_char)\n"
         },
-        {
-          "name": "pad_char",
-          "data_type": "str",
-          "description": "Character to use for padding. Defaults to ' '."
+        "assessment": {
+            "summary_of_findings": "The docstring has multiple issues: parameter name mismatch ('content' vs 'text'), missing 'pad_char' parameter, wrong type for 'max_length' (documented as float but is int), and incorrect return type (documented as list but returns str). All aspects need correction.",
+            "parameter_names_are_correct": false,
+            "parameter_types_are_correct": false,
+            "parameter_descriptions_are_correct": false,
+            "return_type_is_correct": false,
+            "corrected_function_docstring": {
+                "correct_function_description": "Format text string by truncating or padding to specified length",
+                "correct_function_arguments": [
+                    {
+                        "name": "text",
+                        "data_type": "str",
+                        "description": "The text content to format"
+                    },
+                    {
+                        "name": "max_length",
+                        "data_type": "int",
+                        "description": "Maximum length allowed for the formatted text"
+                    },
+                    {
+                        "name": "pad_char",
+                        "data_type": "str",
+                        "description": "Character used for padding when text is shorter than max_length. Defaults to ' '"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "str",
+                        "description": "Formatted text either truncated to max_length or padded with pad_char"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "str",
-          "description": "Formatted text string, truncated or padded to specified length."
-        }
-      ]
     },
-    "summary_of_findings": "Parameter name mismatch: 'content' in docstring vs 'text' in signature. Parameter 'max_length' documented as 'float' but should be 'int'. Missing 'pad_char' parameter. Return type documented as 'list' but should be 'str'."
-  },
-  "build_config_string": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": false,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": true,
-    "corrected_function_docstring": {
-      "correct_function_description": "Generate configuration string from name and dictionary.",
-      "correct_function_arguments": [
-        {
-          "name": "name",
-          "data_type": "str",
-          "description": "Name for the configuration."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "build_config_string",
+            "lineno": 159,
+            "end_lineno": 174,
+            "col_offset": 0,
+            "end_col_offset": 30,
+            "source_code": "def build_config_string(name: str, config: Optional[Dict[str, str]]=None\n    ) ->str:\n    \"\"\"Generate configuration string.\n    \n    Args:\n        name: str\n            Name for the configuration.\n        config: Dict[str, str]\n            Configuration dictionary with string values.\n            \n    Returns:\n        str\n            Formatted configuration string.\n    \"\"\"\n    if config is None:\n        config = {}\n    return f'{name}: {config}'\n"
         },
-        {
-          "name": "config",
-          "data_type": "Optional[Dict[str, str]]",
-          "description": "Configuration dictionary with string values. Defaults to None."
+        "assessment": {
+            "summary_of_findings": "The docstring has one type error - the 'config' parameter is documented as 'Dict[str, str]' but the function signature shows it as 'Optional[Dict[str, str]]' with a default value of None. All parameter names are present and descriptions are clear.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": false,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": true,
+            "corrected_function_docstring": {
+                "correct_function_description": "Generate configuration string from a name and optional configuration dictionary",
+                "correct_function_arguments": [
+                    {
+                        "name": "name",
+                        "data_type": "str",
+                        "description": "Name for the configuration"
+                    },
+                    {
+                        "name": "config",
+                        "data_type": "Optional[Dict[str, str]]",
+                        "description": "Configuration dictionary with string values. Defaults to None"
+                    }
+                ],
+                "correct_function_return_values": [
+                    {
+                        "data_type": "str",
+                        "description": "Formatted configuration string"
+                    }
+                ]
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "str",
-          "description": "Formatted configuration string."
-        }
-      ]
     },
-    "summary_of_findings": "Parameter 'config' documented as 'Dict[str, str]' but should be 'Optional[Dict[str, str]]' since it has a default value of None."
-  },
-  "print_to_console": {
-    "parameter_names_are_correct": true,
-    "parameter_types_are_correct": true,
-    "parameter_descriptions_are_correct": true,
-    "return_type_is_correct": true,
-    "corrected_function_docstring": {
-      "correct_function_description": "Print a message to the console.",
-      "correct_function_arguments": [
-        {
-          "name": "message",
-          "data_type": "str",
-          "description": "Message to print to the console."
+    {
+        "metadata": {
+            "source_path": "tests/data/functions.py",
+            "name": "print_to_console",
+            "lineno": 177,
+            "end_lineno": 188,
+            "col_offset": 0,
+            "end_col_offset": 18,
+            "source_code": "def print_to_console(message: str) ->None:\n    \"\"\"Print a message to the console.\n    \n    Args:\n        message: str\n            Message to print to the console.\n            \n    Returns:\n        None\n            This function does not return a value.\n    \"\"\"\n    print(message)\n"
+        },
+        "assessment": {
+            "summary_of_findings": "The docstring is mostly correct but has a minor issue with the return documentation. While the function does return None, it's more conventional to omit the Returns section entirely for functions that return None, as this is the standard practice for void functions in Python documentation.",
+            "parameter_names_are_correct": true,
+            "parameter_types_are_correct": true,
+            "parameter_descriptions_are_correct": true,
+            "return_type_is_correct": true,
+            "corrected_function_docstring": {
+                "correct_function_description": "Print a message to the console",
+                "correct_function_arguments": [
+                    {
+                        "name": "message",
+                        "data_type": "str",
+                        "description": "Message to print to the console"
+                    }
+                ],
+                "correct_function_return_values": []
+            }
         }
-      ],
-      "correct_function_return_values": [
-        {
-          "data_type": "None",
-          "description": "This function does not return a value."
-        }
-      ]
-    },
-    "summary_of_findings": "Perfect docstring with parameter and return value correctly documented. Return type 'None' is properly documented with explanation."
-  }
-}
+    }
+]

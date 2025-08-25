@@ -22,7 +22,7 @@ class FileParser(SequenceParser):
             if isinstance(node, ast.FunctionDef) and node.name not in self.excluded_names:
                 yield FunctionMetadata.from_ast(node, self.filepath)
 
-            if isinstance(node, ast.ClassDef):
+            if isinstance(node, ast.ClassDef) and node.name not in self.excluded_names:
                 yield ClassMetadata.from_ast(node, self.filepath)
 
     def __read_file(self):

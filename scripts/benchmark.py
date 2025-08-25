@@ -29,10 +29,9 @@ from docterella.pydantic.assessments import FunctionDocstring
 from docterella.pydantic.assessments import ReturnValue
 from docterella.pydantic.assessments import Argument
 from docterella.runner import Runner
-from docterella.agents.config import StreamlinedConfig
-from docterella.agents.config import ReasoningConfig
-from docterella.agents.config import AgentConfig
 from docterella.agents.config import AgentConfigFactory
+from docterella.reports.json import JSONReport
+from docterella.results import ValidationResults
 
 from pydantic import BaseModel
 
@@ -254,15 +253,22 @@ class TestCaseSuite:
         self.input_path  = input_path
         self.response_path = response_path
         self.ValidationClass = ValidationClass
-
-        self._load_expected_response()
+        self._expected_response_dict = None
 
     def _load_expected_response(self):
         """Load expected responses from JSON file into memory."""
         with open(self.response_path, 'r') as f:
-            self.expected_response_dict = json.load(f)
+            expected_responses = json.load(f)
 
-    def get_expected_response(self, result):
+        self._expected_response_dict = {
+            self._get_response_node_id(res['metadata']): res['assessment']
+            for res in expected_responses
+        }
+
+    def _get_response_node_id(self, response: Dict):
+        return f"{response['source_path']} : {response['name']} - {response['lineno']}"
+
+    def get_expected_response(self, result: ValidationResults):
         """Retrieve expected response for a specific validation result.
         
         Parameters
@@ -275,7 +281,13 @@ class TestCaseSuite:
         BaseModel
             Expected response validated against the ValidationClass.
         """
-        expected = self.expected_response_dict[result.metadata.name]
+
+        if self._expected_response_dict is None:
+            self._load_expected_response()
+
+        node_id = self._get_response_node_id(result.metadata.to_dict())
+
+        expected = self._expected_response_dict[node_id]
 
         expected["reasoning"] = {
                 "signature_parameters": [],
@@ -526,7 +538,21 @@ class MetricsCollector:
         translation = str.maketrans({p: "_" for p in punctuation})
 
         return model.translate(translation)
-        
+
+CASE_SUITES = [
+    TestCaseSuite(
+        "function", 
+        "tests/data/functions.py", 
+        "tests/data/function_responses.json",
+        FunctionAssessment
+    ),
+    TestCaseSuite(
+        "class", 
+        "tests/data/class.py", 
+        "tests/data/class_responses.json",
+        ClassAssessment
+    ),
+]
 
 def main(): 
     """Main function to run the benchmarking process.
@@ -535,10 +561,11 @@ def main():
     """
     models = [
         "gpt-5-nano-2025-08-07",
-        # "gpt-5-mini-2025-08-07",
+        "gpt-5-mini-2025-08-07",
         # "claude-sonnet-4-20250514",
         "claude-3-5-haiku-20241022",
         "llama3.1:8b-instruct-q8_0",
+        "phi4-reasoning:plus",
         "phi4-mini-reasoning:3.8b",
         "phi4-mini:latest",
         "deepseek-r1:8b",
@@ -574,23 +601,9 @@ def benchmark(model: str, style: str, mc: MetricsCollector):
     mc : MetricsCollector
         MetricsCollector instance for storing benchmark results.
     """
-    cases = [
-        TestCaseSuite(
-            "function", 
-            "tests/data/functions.py", 
-            "tests/data/function_responses.json",
-            FunctionAssessment
-        ),
-        TestCaseSuite(
-            "class", 
-            "tests/data/class.py", 
-            "tests/data/class_responses.json",
-            ClassAssessment
-        ),
-    ]
     connection = load_model(model)
 
-    for case in cases:
+    for case in CASE_SUITES:
         print(f"\tRunning {case.label}...")
         metric, response = _benchmark_helper(connection, case, style)
         mc.record(model, style, case.label, response, metric)
@@ -659,5 +672,27 @@ def _benchmark_helper(
     return metrics, responses
 
 
+def generate_expected_outputs(model: str = "claude-sonnet-4-20250514", style='basic'):
+    """Use claude to generate expected outputs because it does well at this simple task
+    
+    Still, users should scroll through outputs and validate accuracy for themselves.
+    """
+    connection = load_model(model)
+
+    validator = ValidationAgent(connection, AgentConfigFactory.create(style))
+    
+    for case in CASE_SUITES:
+        print(f"Generating for case {case.label}...", end='', flush=True)
+        parser = FileParser(case.input_path)
+        runner = Runner(parser, validator)
+
+        results = runner.validate_sequence()
+        
+        report = JSONReport(results)
+        report.to_file(case.response_path)
+        
+        print("DONE")
+
 if __name__ == "__main__":
+    # generate_expected_outputs()
     main()

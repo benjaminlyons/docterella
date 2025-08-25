@@ -35,6 +35,9 @@ class Metadata(BaseModel, ABC):
             "end_col_offset": node.end_col_offset,
             "source_code": astor.to_source(node),
         }
+    
+    def to_dict(self):
+        return self.model_dump()
 
 class FunctionMetadata(Metadata):
     type: ClassVar[str] = MetaDataTypes.FUNCTION_TYPE
