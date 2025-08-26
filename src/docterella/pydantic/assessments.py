@@ -37,5 +37,3 @@ class ClassAssessment(Assessment):
     def docstring(self):
         return self.corrected_class_docstring
 
-
-
