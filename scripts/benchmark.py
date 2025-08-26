@@ -7,11 +7,11 @@ against expected responses and generates detailed metrics for performance evalua
 The benchmarking system supports multiple model providers (Anthropic, OpenAI, Ollama)
 and different validation configurations (basic, reasoning, streamlined).
 """
-
 import pandas as pd
 import dataclasses
 import json
 import itertools
+import click
 
 from dataclasses import dataclass
 from typing import List
@@ -554,42 +554,59 @@ CASE_SUITES = [
     ),
 ]
 
-def main(): 
+@click.group()
+def cli():
+    """Cli for benchmarking docterella performance of various prompts and models"""
+    pass
+
+@cli.command()
+@click.option('--model', '-m', multiple=True,
+              help='Model to include in the benchmark')
+@click.option('--style', '-s', multiple=True,
+              help='Prompt styles to benchmark')
+@click.option('--output-dir', '-d', type=click.Path(exists=True, dir_okay=True, file_okay=False),
+              default='tests/data/results/', help='Directory for saving benchmark outputs')
+def benchmark(model: List[str] = None, style: List[str] = None, output_dir: str = None): 
     """Main function to run the benchmarking process.
 
     This function sets up and runs the benchmarking process using a specified model.
     """
-    models = [
-        "gpt-5-nano-2025-08-07",
-        "gpt-5-mini-2025-08-07",
-        # "claude-sonnet-4-20250514",
-        "claude-3-5-haiku-20241022",
-        "llama3.1:8b-instruct-q8_0",
-        "phi4-reasoning:plus",
-        "phi4-mini-reasoning:3.8b",
-        "phi4-mini:latest",
-        "deepseek-r1:8b",
-        "granite3.3:8b",
-        "phi3:14b-medium-128k-instruct-q4_K_M",
-        "phi4:latest",
-        "gemma3:4b-it-qat",
-        "qwen3:latest",
-        "mistral-nemo:12b",
-    ]
-    styles = [
-        'basic',
-        # 'streamlined',
-        'reasoning',
-    ]
+    if model:
+        models = model
+    else:
+        models = [
+            "gpt-5-nano-2025-08-07",
+            "gpt-5-mini-2025-08-07",
+            "claude-3-5-haiku-20241022",
+            "llama3.1:8b-instruct-q8_0",
+            "phi4-reasoning:plus",
+            "phi4-mini-reasoning:3.8b",
+            "phi4-mini:latest",
+            "deepseek-r1:8b",
+            "granite3.3:8b",
+            "phi3:14b-medium-128k-instruct-q4_K_M",
+            "phi4:latest",
+            "gemma3:4b-it-qat",
+            "qwen3:latest",
+            "mistral-nemo:12b",
+        ]
 
-    mc = MetricsCollector()
+    if style:
+        styles = style
+    else: 
+        styles = [
+            'basic',
+            'reasoning',
+        ]
+
+    mc = MetricsCollector(output_dir)
     for model, style in itertools.product(models, styles): 
         print(f"Running benchmarks for {model} ({style})")
-        benchmark(model, style, mc)
+        benchmark_model(model, style, mc)
 
     mc.save_summary_metrics()
 
-def benchmark(model: str, style: str, mc: MetricsCollector):
+def benchmark_model(model: str, style: str, mc: MetricsCollector):
     """Benchmarks a model by comparing its output to expected responses.
 
     Parameters
@@ -608,7 +625,7 @@ def benchmark(model: str, style: str, mc: MetricsCollector):
         metric, response = _benchmark_helper(connection, case, style)
         mc.record(model, style, case.label, response, metric)
 
-def load_model(model):
+def load_model(model: str):
     """Loads a model based on the provided name.
 
     Parameters
@@ -672,10 +689,16 @@ def _benchmark_helper(
     return metrics, responses
 
 
-def generate_expected_outputs(model: str = "claude-sonnet-4-20250514", style='basic'):
-    """Use claude to generate expected outputs because it does well at this simple task
+@cli.command()
+@click.option('--model', '-m', type=str, default='claude-sonnet-04-20250514',
+              help='Model to use for generating the expected outputs')
+@click.option('--style', '-s', type=str, default='basic',
+              help='The prompt style to use for generating the expected outputs')
+def generate_standard(model: str,  style: str):
+    """Generate the benchmarking standard expected outputs using the provided LLM
     
-    Still, users should scroll through outputs and validate accuracy for themselves.
+    Recommend to only use SOTA models that can confidently produce correct results,
+    coupled with human review to validate the outputs.
     """
     connection = load_model(model)
 
@@ -694,5 +717,4 @@ def generate_expected_outputs(model: str = "claude-sonnet-4-20250514", style='ba
         print("DONE")
 
 if __name__ == "__main__":
-    # generate_expected_outputs()
-    main()
+    cli()

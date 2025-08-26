@@ -63,7 +63,7 @@ class ClassMetadata(Metadata):
         
         docstring = ast.get_docstring(node)
 
-        constructor = ClassMetadata.__get_constructor(node)
+        constructor = ClassMetadata.__get_constructor(node, source_path)
 
         return ClassMetadata(
             source_path=source_path,
@@ -73,12 +73,12 @@ class ClassMetadata(Metadata):
         )
     
     @staticmethod
-    def __get_constructor(node: ast.ClassDef):
+    def __get_constructor(node: ast.ClassDef, source_path: str = None):
         for child in ast.iter_child_nodes(node):
             if not isinstance(child, ast.FunctionDef):
                 continue
 
             if child.name == "__init__":
-                return FunctionMetadata.from_ast(child)
+                return FunctionMetadata.from_ast(child, source_path)
             
         return None
