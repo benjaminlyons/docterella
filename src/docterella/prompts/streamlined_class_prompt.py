@@ -4,127 +4,129 @@ Analyze the provided Python class and evaluate whether its docstring accurately 
 
 **YOUR TASK:**
 1. Examine the constructor (__init__) signature
-2. Analyze the existing class docstring (if any)
-3. Set validation flags based on specific criteria
-4. Provide corrections following Google docstring format
+2. Examine the constructor implementation.
+3. Analyze the existing class docstring.
+4. Set validation flags based on specified criteria.
+5. Provide corrections following Google docstring format
 
 **VALIDATION FLAGS - SET THESE CAREFULLY:**
 
-`parameter_names_are_correct`: TRUE only if:
-- Every parameter in __init__ (except 'self') has a corresponding entry in the docstring
-- No extra parameters are documented that don't exist in __init__
-- Focus ONLY on constructor parameters
+`params_match_signature`: TRUE if
+- all parameter names in docstring match all parameter names in signature
+- all parameter types in docstring match all parameter types in signature
 
-`parameter_types_are_correct`: TRUE only if:
-- Every documented parameter's type EXACTLY matches the constructor signature type
-- If no types documented or no docstring, set to FALSE
+`params_match_implementation`: TRUE if
+- all parameter types in docstring match the types in the class implementation
+- all parameter descriptions in docstring are reasonably helpful and accurate based on the class implementation
 
-`parameter_descriptions_are_correct`: TRUE only if:
-- All parameter descriptions are helpful and specific
-- NOT vague like "The value", "The parameter"
-- Mention default values for optional parameters
-- If no descriptions or no docstring, set to FALSE
+# Streamlined Class Prompt Additions
 
-**EXAMPLES TO UNDERSTAND FLAG SETTING:**
+Add these sections to your existing `streamlined_class_prompt.py` file:
 
-EXAMPLE 1 - Missing Parameters:
+## EXAMPLES Section
+Add this after your existing prompt content:
+
 ```python
-class DatabaseConnection:
-    \"\"\"Manage connection to a database.
-    
-    Args:
-        host: str
-            Database server hostname.
-        port: int
-            Port number for connection.
-    \"\"\"
-    def __init__(self, host: str, port: int, username: str, password: str):
-        # constructor code
-```
-Constructor has: host, port, username, password
-Docstring has: host, port only
-FLAGS: parameter_names_are_correct=FALSE (missing username, password)
-       parameter_types_are_correct=TRUE (documented types correct)
-       parameter_descriptions_are_correct=TRUE (descriptions clear)
+**EXAMPLES:**
 
-EXAMPLE 2 - Wrong Type:
-```python
-class FileProcessor:
-    \"\"\"Process files with encoding.
-    
-    Args:
-        filename: int
-            Path to the file.
-        encoding: str
-            Character encoding. Defaults to 'utf-8'.
-    \"\"\"
-    def __init__(self, filename: str, encoding: str = 'utf-8'):
-        # constructor code
-```
-FLAGS: parameter_names_are_correct=TRUE (all params present)
-       parameter_types_are_correct=FALSE (filename should be str not int)
-       parameter_descriptions_are_correct=TRUE (descriptions good, default mentioned)
-
-EXAMPLE 3 - No Docstring:
+**Example 1: Correct docstring**
 ```python
 class Calculator:
-    def __init__(self, precision: int = 2):
-        self.precision = precision
-```
-FLAGS: ALL FALSE (no docstring exists)
-
-EXAMPLE 4 - Extra Parameter in Docstring:
-```python
-class EmailSender:
-    \"\"\"Send emails via SMTP.
+    \"\"\"A simple calculator class for basic arithmetic operations.
     
-    Args:
-        smtp_host: str
-            SMTP server hostname.
-        smtp_port: int
-            SMTP server port.
-        timeout: int
-            Connection timeout.
+    Parameters
+    ----------
+    precision : int
+        Number of decimal places for calculations (default: 2).
+    debug_mode : bool
+        Enable debug logging for operations (default: False).
     \"\"\"
-    def __init__(self, smtp_host: str, smtp_port: int):
-        # only has two parameters
+    
+    def __init__(self, precision: int = 2, debug_mode: bool = False):
+        self.precision = precision
+        self.debug_mode = debug_mode
 ```
-FLAGS: parameter_names_are_correct=FALSE (extra 'timeout' in docstring)
-       parameter_types_are_correct=TRUE (existing params correct)
-       parameter_descriptions_are_correct=TRUE
 
-**REQUIRED JSON OUTPUT:**
+**Analysis:** Constructor has parameters `precision: int` and `debug_mode: bool`. Docstring documents both parameters with correct names, types, and helpful descriptions. All validation criteria are met.
+
+**Expected:** `params_match_signature: true`, `params_match_implementation: true`
+
+**Example 2: Missing parameter in docstring**
+```python
+class DatabaseConnection:
+    \"\"\"Database connection handler.
+    
+    Parameters
+    ----------
+    host : str
+        Database host address.
+    \"\"\"
+    
+    def __init__(self, host: str, port: int = 5432, timeout: float = 30.0):
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+```
+
+**Analysis:** Constructor has 3 parameters but docstring only documents `host`. Missing `port` and `timeout` parameters from docstring.
+
+**Expected:** `params_match_signature: false`, `params_match_implementation: false`
+
+**Example 3: Wrong parameter types**
+```python
+class FileProcessor:
+    \"\"\"Processes files with specified settings.
+    
+    Parameters
+    ----------
+    buffer_size : str
+        Size of the processing buffer.
+    async_mode : int  
+        Whether to process asynchronously.
+    \"\"\"
+    
+    def __init__(self, buffer_size: int = 1024, async_mode: bool = True):
+        self.buffer_size = buffer_size
+        self.async_mode = async_mode
+```
+
+**Analysis:** Parameter names match but types are wrong in docstring. `buffer_size` should be `int` not `str`, `async_mode` should be `bool` not `int`.
+
+**Expected:** `params_match_signature: false`, `params_match_implementation: false`
+
+**OUTPUT FORMAT:**
+You MUST respond with ONLY this JSON structure. No other text.
+
+```json
 {
+  "params_match_signature": true_or_false,
+  "params_match_implementation": true_or_false,
   "reasoning": {
-    "signature_parameters": ["list of parameter names from constructor"],
-    "docstring_parameters": ["list of parameter names from docstring"],
+    "signature_params": ["list of parameter names from constructor"],
+    "docstring_params": ["list of parameter names from docstring"],
     "missing_params_from_docstring": ["parameters in constructor but not docstring"],
+    "missing_params_from_implementation": [],
     "extra_params_in_docstring": ["parameters in docstring but not constructor"],
-    "incorrect_param_descriptions": ["parameters with vague/unhelpful descriptions"]
+    "params_with_correct_descriptions": ["parameters with helpful descriptions"]
   },
-  "summary_of_findings": "Brief description of issues or 'Perfect docstring' if all correct",
-  "parameter_names_are_correct": true_or_false,
-  "parameter_types_are_correct": true_or_false,
-  "parameter_descriptions_are_correct": true_or_false,
-  "corrected_class_docstring": {
-    "correct_class_description": "One sentence starting with a verb",
-    "correct_class_arguments": [
+  "correct_docstring": {
+    "summary": "One sentence describing what the class does",
+    "arguments": [
       {
         "name": "parameter_name",
         "data_type": "exact_type_from_constructor",
-        "description": "Clear description. Defaults to X if optional"
+        "description": "Clear description with defaults noted if applicable"
       }
     ]
   }
 }
+```
 
-**CRITICAL RULES:**
-- Use EXACT types from constructor (Optional[Dict[str, str]] not dict)
-- If no docstring exists, ALL flags must be FALSE
-- Never include 'self' in documentation
-- Description starts with verb: "Manage" not "Manages"
+**JSON FIELD DESCRIPTIONS:**
+- `params_match_signature`: True if all parameter names and types in docstring exactly match constructor signature
+- `params_match_implementation`: True if parameter types match implementation AND descriptions are helpful/accurate
+- `reasoning`: Detailed breakdown showing which parameters are missing, extra, or incorrect
+- `correct_docstring`: Properly formatted docstring with summary and complete argument documentation using exact types from constructor
+```
 
-The class docstring is provided within <docstring> tags and the constructor is provided within <constructor> tags.
-
-RESPOND WITH ONLY THE JSON. NO OTHER TEXT.
 """
